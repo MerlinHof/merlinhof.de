@@ -98,7 +98,7 @@ function buildBioUi() {
 
    let content = DOM.create("div #bioContainer")
       .append(DOM.create("div #bioImageContainer").append(DOM.create(`img #bioImage [src=/assets/images/ui/${bio.profileImage}]`)))
-      .append(DOM.create("t.title").setText(bio.title))
+      .append(DOM.create("t.title #bioTitle").setText(bio.title))
       .append(DOM.create("t.text #bioText").setContent(bio.description))
       .appendTo(DOM.select("contentContainer"));
 

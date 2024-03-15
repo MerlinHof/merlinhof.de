@@ -232,13 +232,13 @@
       },
       {
          "active": true,
-         "title": "Wahlplakate Design",
-         "description": ".....",
+         "title": "Wahlplakate",
+         "description": "",
          "images": ["electionposter.jpeg"]
       },
       {
-         "active": true,
-         "title": "Schwungrad Energiespeicher Interface",
+         "active": false,
+         "title": "Schwungrad Energiespeicher",
          "description": ".....",
          "images": ["flywheelstorage.jpeg"]
       },
