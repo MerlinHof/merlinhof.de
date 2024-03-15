@@ -11,6 +11,15 @@ setTimeout(async () => {
    projects = await (await fetch("projects.json")).json();
 }, 200);
 
+// Start SVG Animation
+async function startSvgAnimation() {
+   const merlinSvgString = await (await fetch("/assets/images/ui/immerlin.svg")).text();
+   let merlinSvgElement = new DOMParser().parseFromString(merlinSvgString, "image/svg+xml").documentElement;
+   merlinSvgElement.id = "handwritingSvg";
+   DOM.select("svgContainer").getFirstElement().appendChild(merlinSvgElement);
+}
+startSvgAnimation();
+
 // Scroll Image Parallax Effects
 window.addEventListener("scroll", () => {
    DOM.select(".projectElementImage").forEvery((elem) => {
@@ -98,7 +107,7 @@ function buildBioUi() {
       buttonContainer.append(
          DOM.create("div.button.flatButton")
             .onClick(() => {
-               window.location.href = action.href;
+               window.open(action.href, "_blank");
             })
             .append(DOM.create(`img.buttonImage [src=/assets/images/ui/${action.icon}]`))
             .append(action.text),

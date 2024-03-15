@@ -8,15 +8,16 @@
 
 #handwritingSvg {
    width: 80vw;
-   max-width: 450px;
-   animation: scale_animation 4s both 0.3s;
+   max-width: 800px;
+   animation: scale_animation 4s both 0.1s;
+   margin-top: -80px;
 }
 
 @keyframes scale_animation {
    from {
-      transform: scale(0.7);
+      transform: scale(0.6);
       filter: blur(10px);
-      opacity: 0.3;
+      opacity: 0;
    }
 
    to {
@@ -26,7 +27,7 @@
    }
 }
 
-.handwritingPath {
+#handwritingSvg path {
    stroke: var(--textColor);
    stroke-width: 0;
    fill: none;
@@ -93,7 +94,7 @@
    padding: 8px 25px;
    border: 2px solid rgba(0, 0, 0, 0.07);
    margin: 0px 5px;
-   border-radius: 12px;
+   border-radius: 14px;
    transition: 0.3s;
    -webkit-user-select: none;
    -moz-user-select: none;
@@ -233,7 +234,7 @@
    transition: 0.3s;
    z-index: -1;
    background-color: var(--textColor);
-   opacity: 0.3;
+   opacity: 0.2;
 }
 
 .projectElementImage {

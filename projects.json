@@ -250,19 +250,25 @@
       }
    ],
    "bio": {
-      "profileImage": "magician.png",
-      "title": "Hey, ich bin Merlin 😊",
-      "description": "Schön, dass Du hier bist! Das wichtigste vorweg; diese Website ist eine Sammlung einiger meiner experimentellen und präsentierbaren persönlichen Projekte. Nicht allumfassend, nicht unbedingt das allerbeste und nicht zu 100% fertig, aber alles, was ich hier gut aufgehoben sehe. <br /><br />Kurz über mich: Ich bin 21 Jahre alt und studiere derzeit Informatik an der Technischen Universität München. So gut, so langweilig. Meine Interessen gehen jedoch weit über Computer hinaus und reichen tief in die Bereiche Künstliche Intelligenz, User Experience Design und die Psychologie. Auch beschäftige ich mich gerne mit technischen und sozialen Lösungen für die Energie- und Verkehrswende in den Bereichen Energietechnik, menschenzentrisches Stadtdesign und Elektromobilität, um meinen Teil dazu beitragen zu können, die drängenden Probleme unserer Zeit zu lösen. Dazu \"bastle\" ich gerne und habe mir beispielsweise mithilfe einiger 3D-gedruckter Teile ein E-Bike, ein \"kleines\" drei Meter hohes vertikales Windrad oder eine PV-Inselanlage gebaut. Um die Schönheit der Landschaft einzufangen fliege ich auch liebend gerne mit meiner Drohne und mache schöne Luftaufnahmen. Dieser Weg hat mich dazu inspiriert, über den Tellerrand hinauszuschauen und tiefe, interdisziplinäre Verbindungen zwischen Technologie, Umwelt und Gesellschaft zu erkunden.<br /><br />Du kannst mir gerne jederzeit eine Email schreiben. Wenn Du ChatGPT-Plus-Abonnent bist, kannst du gerne auch spaßeshalber mit einem virtuellen Klon von mir sprechen.",
+      "profileImage": "profile_picture.jpeg",
+      "title": "Welcome to my Website 👋",
+      "description": "I'm a 21-year-old Computer Science student at the Technical University of Munich (TUM), deeply passionate about creating innovative solutions that bridge technology and environmental sustainability. While my academic journey has me immersed in the world of code, my curiosity extends far beyond. From artificial intelligence and user experience design to the psychology behind technology, I find excitement in the interplay between technology and human experience.<br><br>My enthusiasm doesn't stop at software. I am committed to exploring and implementing sustainable mobility and renewable energy technologies. Whether it's building an e-bike from 3D-printed parts, crafting a vertical wind turbine, or setting up a solar-powered system, I'm always on the hunt for ways to leverage technology for a greener future. And yes, capturing the beauty of our planet with my drone is a hobby that never ceases to amaze me.<br><br>This Website is a showcase of my journey, featuring a mix of experimental and polished projects that reflect my dedication to tech innovation and environmental conservation. While not exhaustive or perfect, it represents a snapshot of my ongoing exploration into how technology can be a force for good.<br><br>Feel free to reach out to me via email for collaborations, discussions, or just to share your thoughts on the future of technology and sustainability. If you're a ChatGPT-Plus subscriber, why not have a chat with a virtual clone of me for fun? Let's explore the limitless possibilities together!",
+      "description2": "Schön, dass Du hier bist! Das wichtigste vorweg; diese Website ist eine Sammlung einiger meiner experimentellen und präsentierbaren persönlichen Projekte. Nicht allumfassend, nicht unbedingt das allerbeste und nicht zu 100% fertig, aber alles, was ich hier gut aufgehoben sehe. <br /><br />Kurz über mich: Ich bin 21 Jahre alt und studiere derzeit Informatik an der Technischen Universität München. So gut, so langweilig. Meine Interessen gehen jedoch weit über Computer hinaus und reichen tief in die Bereiche Künstliche Intelligenz, User Experience Design und die Psychologie. Auch beschäftige ich mich gerne mit technischen und sozialen Lösungen für die Energie- und Verkehrswende in den Bereichen Energietechnik, menschenzentrisches Stadtdesign und Elektromobilität, um meinen Teil dazu beitragen zu können, die drängenden Probleme unserer Zeit zu lösen. Dazu \"bastle\" ich gerne und habe mir beispielsweise mithilfe einiger 3D-gedruckter Teile ein E-Bike, ein \"kleines\" drei Meter hohes vertikales Windrad oder eine PV-Inselanlage gebaut. Um die Schönheit der Landschaft einzufangen fliege ich auch liebend gerne mit meiner Drohne und mache schöne Luftaufnahmen. Dieser Weg hat mich dazu inspiriert, über den Tellerrand hinauszuschauen und tiefe, interdisziplinäre Verbindungen zwischen Technologie, Umwelt und Gesellschaft zu erkunden.<br /><br />Du kannst mir gerne jederzeit eine Email schreiben. Wenn Du ChatGPT-Plus-Abonnent bist, kannst du gerne auch spaßeshalber mit einem virtuellen Klon von mir sprechen.",
       "actions": [
          {
-            "text": "Schreibe Mir",
+            "text": "Email Me",
             "href": "mailto:contact@merlinhof.de?subject=merlinhof.de&body=Hey%20:D",
             "icon": "mail.png"
          },
          {
-            "text": "Virtuelles Ich",
+            "text": "Virtual Me",
             "href": "https://chat.openai.com/g/g-7Vk47IFtS-virtualmerlin",
             "icon": "star.png"
+         },
+         {
+            "text": "GitHub",
+            "href": "https://github.com/merlinhof",
+            "icon": "github.png"
          }
       ]
    }
