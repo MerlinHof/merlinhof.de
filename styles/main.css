@@ -18,6 +18,7 @@
       filter: blur(10px);
       opacity: 0.3;
    }
+
    to {
       transform: scale(1);
       filter: none;
@@ -41,6 +42,7 @@
       fill: transparent;
       stroke-width: 7;
    }
+
    to {
       stroke-dashoffset: 0;
       fill: var(--textColor);
@@ -66,6 +68,7 @@
    z-index: 10;
    pointer-events: none;
 }
+
 #blurBorder::after {
    content: "";
    display: block;
@@ -98,25 +101,31 @@
    user-select: none;
    display: flex;
    align-items: center;
+
    @media (prefers-color-scheme: dark) {
       border: 2px solid rgba(255, 255, 255, 0.07);
    }
 }
+
 @media (pointer: fine) {
    .sectionButton:hover {
       background-color: rgba(0, 0, 0, 0.07);
+
       @media (prefers-color-scheme: dark) {
          background-color: rgba(255, 255, 255, 0.07);
       }
    }
+
    .sectionButton:active {
       transform: scale(0.9);
    }
 }
+
 .sectionButton.selected {
    background-color: var(--textColor);
    color: var(--themeColor);
    border: 2px solid rgba(0, 0, 0, 0.5);
+
    @media (prefers-color-scheme: dark) {
       border: 2px solid rgba(255, 255, 255, 0.5);
    }
@@ -145,6 +154,7 @@
    color: black;
    background-color: rgba(80, 130, 155, 0);
    box-shadow: inset 0px 0px 10px 30px rgba(80, 130, 155, 0.15);
+
    @media (pointer: fine) {
       &:hover {
          background-color: rgba(80, 130, 155, 0.1);
@@ -152,10 +162,12 @@
          transform: scale(1.05);
       }
    }
+
    @media (prefers-color-scheme: dark) {
       box-shadow: inset 0px 0px 10px 30px rgba(220, 230, 250, 0.1);
       background-color: transparent;
       color: white;
+
       @media (pointer: fine) {
          &:hover {
             background-color: rgba(220, 230, 250, 0.1);
@@ -167,10 +179,12 @@
 
 #contentContainer {
    transition: 0.3s;
-   padding-bottom: 200px;
+   padding-bottom: 180px;
+
    &:empty {
       padding: 0px;
    }
+
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -192,30 +206,20 @@
    max-width: 600px;
    box-sizing: border-box;
 }
-.projectElementTitle {
-   margin-bottom: 30px;
-}
+
 .projectElementDescription {
    text-align: center;
-   margin-top: 30px;
+   margin-bottom: 30px;
 }
+
 .projectElementImageContainer {
-   width: 100%;
+   width: 90%;
    position: relative;
    transition: 0.3s;
+   margin-top: 20px;
+   margin-bottom: 30px;
 }
-.projectElementImageContainer::before {
-   content: "";
-   display: block;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   left: 0px;
-   top: 0px;
-   border-radius: 32px;
-   border: 2px solid rgba(255, 255, 255, 0.1);
-   box-sizing: border-box;
-}
+
 .projectElementImageContainer::after {
    content: "";
    display: block;
@@ -225,10 +229,13 @@
    left: -12px;
    top: -12px;
    border-radius: 44px;
-   border: 2px solid rgba(255, 255, 255, 0.1);
    box-sizing: border-box;
    transition: 0.3s;
+   z-index: -1;
+   background-color: var(--textColor);
+   opacity: 0.3;
 }
+
 .projectElementImage {
    width: 100%;
    aspect-ratio: 19/11;
@@ -245,6 +252,7 @@
 .designElementContainer {
    max-width: none;
 }
+
 .designImage {
    width: 100%;
    max-width: 900px;
@@ -273,6 +281,7 @@
    margin-bottom: 100px;
    position: relative;
 }
+
 #bioImageContainer::after {
    content: "";
    position: absolute;
@@ -280,9 +289,10 @@
    left: 0;
    right: 0;
    bottom: 0;
-   border: 2px solid rgba(255, 255, 255, 0.3);
    border-radius: 200px;
+   border: 2px solid rgba(255, 255, 255, 0.3);
 }
+
 #bioImage {
    width: 100%;
    height: 100%;
