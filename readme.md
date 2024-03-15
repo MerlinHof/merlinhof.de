@@ -1,3 +1,3 @@
 ## My Personal Website
 
-description coming soon...
+This is just my personal website, where I present my personal projects.
