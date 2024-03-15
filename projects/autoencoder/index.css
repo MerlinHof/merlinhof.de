@@ -1,0 +1,57 @@
+*{
+  font-family: monospace;
+  cursor: default;
+}
+
+#canvas {
+  width: 280px;
+  height: 280px;
+  background-color: rgb(0, 0, 0);
+  border-radius: 20px;
+  box-shadow: 0px 3px 20px rgba(20, 30, 40, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: 0.2s all;
+}
+
+#disclaimerContainer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  transition: 0.4s all;
+  z-index: 10;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: bolder;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.text {
+  text-align: center;
+  opacity: 0.7;
+  max-width: 900px;
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+#statusText {
+  margin-left: 0px;
+  margin-top: 0px;
+  color: rgb(100, 120, 140);
+}
+
+.button {
+  font-family: monospace;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  padding-top: 8px;
+}

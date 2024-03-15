@@ -1,0 +1,49 @@
+#controlContainer {
+  display: inline-block;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#canvas {
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  background-color: rgb(35, 45, 60);
+  border-radius: 27px;
+  box-shadow: 0px 3px 20px rgba(20, 30, 40, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.button {
+  margin-top: 0px;
+  margin-right: 0px;
+}
+
+#infobutton {
+  background-image: none;
+  box-shadow: none;
+  background-color: rgb(210, 218, 225);
+  color: #000000;
+}
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+  #canvas {
+    box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  #infobutton {
+    background-color: rgb(35, 45, 60);
+    color: #ffffff;
+  }
+  #overlay {
+    background-color: rgb(35, 45, 60);
+  }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .reload:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

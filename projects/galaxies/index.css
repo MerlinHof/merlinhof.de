@@ -1,0 +1,55 @@
+body {
+  background-color: rgb(5, 7, 14);
+  padding: 0px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#canvas {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0);
+  touch-action: none;
+  z-index: 1;
+}
+
+.button {
+  position: absolute;
+  z-index: 2;
+}
+
+#reloadButtonContainer {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 3;
+  box-sizing: border-box;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#reloadButtonContainer:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.2);
+}
+#reloadButtonContainer:active {
+  transform: scale(0.8);
+}
+#reloadButton {
+  width: 50%;
+  height: 50%;
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  #reloadButtonContainer:hover {
+    background-color: rgba(255, 255, 255, 0.0);
+    transform: scale(1.0);
+  }
+}

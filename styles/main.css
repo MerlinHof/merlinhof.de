@@ -1,0 +1,296 @@
+@import url("./shared.css");
+
+/*
+----------------------------------------------------------------------------------------------
+ Handwriting Animation
+----------------------------------------------------------------------------------------------
+*/
+
+#handwritingSvg {
+   width: 80vw;
+   max-width: 450px;
+   animation: scale_animation 4s both 0.3s;
+}
+
+@keyframes scale_animation {
+   from {
+      transform: scale(0.7);
+      filter: blur(10px);
+      opacity: 0.3;
+   }
+   to {
+      transform: scale(1);
+      filter: none;
+      opacity: 1;
+   }
+}
+
+.handwritingPath {
+   stroke: var(--textColor);
+   stroke-width: 0;
+   fill: none;
+   stroke-linecap: round;
+   stroke-dasharray: 2000;
+   stroke-dashoffset: 0;
+   animation: handwriting_animation 4s both 0.3s;
+}
+
+@keyframes handwriting_animation {
+   from {
+      stroke-dashoffset: 2000;
+      fill: transparent;
+      stroke-width: 7;
+   }
+   to {
+      stroke-dashoffset: 0;
+      fill: var(--textColor);
+      stroke-width: 0;
+   }
+}
+
+/*
+----------------------------------------------------------------------------------------------
+ Section Button Stuff
+----------------------------------------------------------------------------------------------
+*/
+
+#blurBorder {
+   width: 140%;
+   height: 250px;
+   position: fixed;
+   left: -20%;
+   bottom: 0px;
+   transform: translateY(100px);
+   background-image: linear-gradient(to bottom, rgba(235, 245, 255, 0), var(--themeColor), var(--themeColor));
+   filter: blur(20px);
+   z-index: 10;
+   pointer-events: none;
+}
+#blurBorder::after {
+   content: "";
+   display: block;
+   width: 100%;
+   height: 100%;
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+}
+
+#sectionButtonContainer {
+   z-index: 12;
+   display: flex;
+   justify-content: center;
+   position: fixed;
+   bottom: 40px;
+   box-sizing: border-box;
+   left: 50%;
+   transform: translateX(-50%);
+}
+
+.sectionButton {
+   padding: 8px 25px;
+   border: 2px solid rgba(0, 0, 0, 0.07);
+   margin: 0px 5px;
+   border-radius: 12px;
+   transition: 0.3s;
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+   display: flex;
+   align-items: center;
+   @media (prefers-color-scheme: dark) {
+      border: 2px solid rgba(255, 255, 255, 0.07);
+   }
+}
+@media (pointer: fine) {
+   .sectionButton:hover {
+      background-color: rgba(0, 0, 0, 0.07);
+      @media (prefers-color-scheme: dark) {
+         background-color: rgba(255, 255, 255, 0.07);
+      }
+   }
+   .sectionButton:active {
+      transform: scale(0.9);
+   }
+}
+.sectionButton.selected {
+   background-color: var(--textColor);
+   color: var(--themeColor);
+   border: 2px solid rgba(0, 0, 0, 0.5);
+   @media (prefers-color-scheme: dark) {
+      border: 2px solid rgba(255, 255, 255, 0.5);
+   }
+}
+
+/*
+----------------------------------------------------------------------------------------------
+ General
+----------------------------------------------------------------------------------------------
+*/
+
+.screenFillingContainer {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   min-height: calc(100vh - 80px);
+   box-sizing: border-box;
+   overflow-x: hidden;
+}
+
+.flatButton {
+   box-shadow: none;
+   margin-top: 30px;
+   color: black;
+   background-color: rgba(80, 130, 155, 0);
+   box-shadow: inset 0px 0px 10px 30px rgba(80, 130, 155, 0.15);
+   @media (pointer: fine) {
+      &:hover {
+         background-color: rgba(80, 130, 155, 0.1);
+         box-shadow: inset 0px 0px 0px 3px rgba(80, 130, 155, 0.3);
+         transform: scale(1.05);
+      }
+   }
+   @media (prefers-color-scheme: dark) {
+      box-shadow: inset 0px 0px 10px 30px rgba(220, 230, 250, 0.1);
+      background-color: transparent;
+      color: white;
+      @media (pointer: fine) {
+         &:hover {
+            background-color: rgba(220, 230, 250, 0.1);
+            box-shadow: inset 0px 0px 0px 3px rgba(220, 230, 250, 0.1);
+         }
+      }
+   }
+}
+
+#contentContainer {
+   transition: 0.3s;
+   padding-bottom: 200px;
+   &:empty {
+      padding: 0px;
+   }
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+/*
+----------------------------------------------------------------------------------------------
+ Projects Container
+----------------------------------------------------------------------------------------------
+*/
+
+.projectElementContainer {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   margin-bottom: 30vh;
+   width: 100%;
+   max-width: 600px;
+   box-sizing: border-box;
+}
+.projectElementTitle {
+   margin-bottom: 30px;
+}
+.projectElementDescription {
+   text-align: center;
+   margin-top: 30px;
+}
+.projectElementImageContainer {
+   width: 100%;
+   position: relative;
+   transition: 0.3s;
+}
+.projectElementImageContainer::before {
+   content: "";
+   display: block;
+   width: 100%;
+   height: 100%;
+   position: absolute;
+   left: 0px;
+   top: 0px;
+   border-radius: 32px;
+   border: 2px solid rgba(255, 255, 255, 0.1);
+   box-sizing: border-box;
+}
+.projectElementImageContainer::after {
+   content: "";
+   display: block;
+   width: calc(100% + 24px);
+   height: calc(100% + 24px);
+   position: absolute;
+   left: -12px;
+   top: -12px;
+   border-radius: 44px;
+   border: 2px solid rgba(255, 255, 255, 0.1);
+   box-sizing: border-box;
+   transition: 0.3s;
+}
+.projectElementImage {
+   width: 100%;
+   aspect-ratio: 19/11;
+   object-fit: cover;
+   border-radius: 32px;
+}
+
+/*
+----------------------------------------------------------------------------------------------
+ Designs Container
+----------------------------------------------------------------------------------------------
+*/
+
+.designElementContainer {
+   max-width: none;
+}
+.designImage {
+   width: 100%;
+   max-width: 900px;
+   margin-bottom: 40px;
+   border-radius: 32px;
+   object-fit: contain;
+}
+
+/*
+----------------------------------------------------------------------------------------------
+ Bio Container
+----------------------------------------------------------------------------------------------
+*/
+
+#bioContainer {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+#bioImageContainer {
+   width: 160px;
+   height: 160px;
+   border-radius: 200px;
+   overflow: hidden;
+   margin-bottom: 100px;
+   position: relative;
+}
+#bioImageContainer::after {
+   content: "";
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   border: 2px solid rgba(255, 255, 255, 0.3);
+   border-radius: 200px;
+}
+#bioImage {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+}
+
+#bioText {
+   text-align: left;
+   max-width: 600px;
+   margin-bottom: 60px;
+}

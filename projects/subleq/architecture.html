@@ -1,0 +1,98 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/subleq/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="architecture.css?v=18" />
+   </head>
+
+   <body>
+      <t class="title" id="title">Architecture</t><br /><br />
+      <t class="text">
+         Here you will find all the important information about this Subleq assembler. Unsupported instructions can always be recreated using macros. There are seven general purpose registers A, B, C,
+         D, E, F, G and the stack pointer SP (initialized automatically). The stack grows upwards. There are also five registers z0 to z4 which are used as temporary registers by the assembler and
+         should not be utilized by your assembly code. The following variable types are allowed for most of the instruction parameters:
+         <br />- Registers (eg. A, B, ...) <br />- Constants (eg. 7, 12, ...) <br />- Labels (eg. loop, main, ...) <br />- Pointers ([A] or [7] or [label]) <br /><br />There are several assembler
+         constants for you to use as well: <br />- StackBase: The starting address of the stack <br />- HeapBase: The starting address of the heap </t
+      ><br /><br />
+
+      <!-- Arithmetic -->
+      <t class="foreground code">ADD A, B</t>
+      <br /><t class="text">Adds A to B and stores the result in A.</t> <br /><t class="pseudocode">A = A + B;</t>
+
+      <br /><br /><t class="foreground code">SUB A, B</t> <br /><t class="text">Subtracts B from A and stores the result in A.</t> <br /><t class="pseudocode">A = A - B;</t>
+
+      <br /><br /><t class="foreground code">MUL A, B</t> <br /><t class="text">Multiplies A with B and stores the result in A.</t> <br /><t class="pseudocode">A = A * B;</t>
+
+      <br /><br /><t class="foreground code">DIV A, B</t> <br /><t class="text">Divides A by B and stores the result in A.</t> <br /><t class="pseudocode">A = A / B;</t>
+
+      <br /><br /><t class="foreground code">MOD A, B</t> <br /><t class="text">Divides A by B and stores the remainder in A.</t> <br /><t class="pseudocode">A = A % B;</t>
+
+      <!-- Direct Manipulation -->
+      <br /><br /><t class="foreground code">CLR A</t> <br /><t class="text">Sets A to zero.</t> <br /><t class="pseudocode">A = 0;</t>
+
+      <br /><br /><t class="foreground code">MOV A, B</t> <br /><t class="text">Copies B to A.</t> <br /><t class="pseudocode">A = B;</t>
+
+      <br /><br /><t class="foreground code">INC A</t><t class="foreground code">DEC A</t> <br /><t class="text">Increments / Decrements the value stored in A.</t> <br /><t class="pseudocode"
+         >A++; / A--;</t
+      >
+
+      <!-- Branches -->
+      <br /><br /><t class="foreground code">JMP A</t> <br /><t class="text">Jumps unconditionally to A.</t> <br /><t class="pseudocode">GOTO A;</t>
+
+      <br /><br /><t class="foreground code">BLE A, B, C</t> <br /><t class="text">Jumps to C if A is less than or equal to B.</t> <br /><t class="pseudocode">if (A <= B) { GOTO C }</t>
+
+      <br /><br /><t class="foreground code">BLT A, B, C</t> <br /><t class="text">Jumps to C if A is less than B.</t> <br /><t class="pseudocode">if (A < B) { GOTO C }</t>
+
+      <br /><br /><t class="foreground code">BGE A, B, C</t> <br /><t class="text">Jumps to C if A is greater than or equal to B.</t> <br /><t class="pseudocode">if (A >= B) { GOTO C }</t>
+
+      <br /><br /><t class="foreground code">BGT A, B, C</t> <br /><t class="text">Jumps to C if A is greater than B.</t> <br /><t class="pseudocode">if (A > B) { GOTO C }</t>
+
+      <br /><br /><t class="foreground code">BEQ A, B, C</t> <br /><t class="text">Jumps to C if A is equal to B.</t> <br /><t class="pseudocode">if (A == B) { GOTO C }</t>
+
+      <br /><br /><t class="foreground code">BNE A, B, C</t> <br /><t class="text">Jumps to C if A is not equal to B.</t> <br /><t class="pseudocode">if (A != B) { GOTO C }</t>
+
+      <!-- Stack Operators -->
+      <br /><br /><t class="foreground code">PUSH A</t> <br /><t class="text">Pushes A to the stack.</t> <br /><t class="pseudocode">stack.push(A);</t>
+
+      <br /><br /><t class="foreground code">POP A</t> <br /><t class="text">Pops from the stack to A.</t> <br /><t class="pseudocode">A = stack.pop();</t>
+
+      <br /><br /><t class="foreground code">CALL A</t> <br /><t class="text"
+         >Jumps to a subroutine. The return address is pushed onto the stack, so that you can return back to where you called the subroutine from.</t
+      >
+      <br /><t class="pseudocode">A();</t>
+
+      <br /><br /><t class="foreground code">RET</t> <br /><t class="text">Returns from a subroutine back to where the subroutine was called from.</t> <br /><t class="pseudocode">return;</t>
+
+      <!-- ETC -->
+      <br /><br /><t class="foreground code">HLT</t> <br /><t class="text">Halts the program by creating an infinite, unbreakable loop.</t> <br /><t class="pseudocode">exit();</t>
+
+      <br /><br /><t class="foreground code">DB "Hello World"</t><t class="foreground code">DB 12</t> <br /><t class="text"
+         >Used to store strings or constants to which can be referred using a label. Can also be used as a variable.</t
+      >
+      <br /><t class="pseudocode">labelName = "Hello World";<br />labelName = 12;</t>
+
+      <br /><br /><t class="foreground code">#DEFINE A B</t> <br /><t class="text"
+         >Defines an assembler constant with the name A and the value B. The resulting instructions are not affected by this, it just makes it easier to write a program.</t
+      >
+      <br /><t class="pseudocode">const A = B;</t>
+
+      <br /><br />
+      <div class="foreground code" style="padding-top: 0px">
+         <t class="text" style="white-space: pre-wrap"
+            >#MACRO add3 target, par1, par2, par3<br />
+            mov target, par1<br />
+            add target, par2<br />
+            add target, par3<br />#END<br />...<br /><br />add3 a, b, c, d</t
+         >
+      </div>
+      <br /><t class="text"
+         >Defines a new macro to create a new instruction. An unlimited number of parameters is allowed. You can use all supported functions inside the macro like labels, branches or even other
+         macros. The macro in this example is used to add three values and store the result at the provided target address.</t
+      >
+      <br /><t class="pseudocode">function add3(target, par1, par2, par3) {<br />&nbsp;&nbsp;target = par1 + par2 + par3;<br />}</t>
+
+      <br /><br />
+   </body>
+</html>

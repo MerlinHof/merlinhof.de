@@ -1,0 +1,20 @@
+body {
+   padding: 0px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+#canvas {
+   width: 100vw;
+   height: 100vh;
+   touch-action: none;
+}
+#canvas:hover {
+   cursor: crosshair;
+}
+
+.button {
+   position: absolute;
+   z-index: 4;
+}

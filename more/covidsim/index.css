@@ -1,0 +1,107 @@
+@font-face {
+    font-family: "name";
+    src: url("/sources/futura.ttf") format("truetype");
+    font-weight: 100;
+    font-style: normal;
+}
+
+*{
+    font-family: name;
+}
+
+:root {
+  --padding: 40px;
+}
+
+body {
+    background-color: #1b1e26;
+    color: rgba(255, 255, 255, 0.1);
+    margin: 0 !important;
+    padding: var(--padding);
+    cursor: default;
+}
+
+.title {
+  font-size: 30px;
+  color: #ffffff;
+  opacity: 1.0;
+}
+
+.text {
+  font-size: 24px;
+  color: #ffffff;
+  opacity: 0.5;
+  display: inline-block;
+  margin-top: 5px;
+  max-width: 800px;
+}
+
+.button {
+  height: 45px;
+  background-color: #1c4966;
+  color: #ffffff;
+  font-size: 20px;
+  border: none;
+  border-radius: 12px;
+  transition: all 0.2s;
+  margin-left: 0px;
+  margin-top: 20px;
+  outline: none;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-bottom: 20px;
+}
+
+.button:hover {
+  transform: scale(1.2, 1.2);
+  background-color: #296d98;
+}
+
+.button:active {
+  opacity: 0.5;
+  transform: scale(0.8, 0.8);
+}
+
+.img {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* Light mode*/
+@media (prefers-color-scheme: light) {
+  .button {
+    background-color: rgb(56, 112, 224);
+  }
+  .button:hover {
+    background-color: #2196f3;
+  }
+  body {
+      background-color: #eceff1;
+  }
+  .title {
+    color: #000000;
+  }
+  .text {
+    color: #000000;
+  }
+}
+
+
+
+/* Mobile mode */
+@media only screen and (max-width:740px) {
+  :root {
+    --padding: 10px;
+  }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .button:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

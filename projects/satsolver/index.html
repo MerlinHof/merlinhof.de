@@ -1,0 +1,154 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>SAT Solver</title>
+  <meta name="description" content="A SAT solver (Satisfiability solver) can solve many NP problems such as Sudoku."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/satsolver/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  Hello There!
+</body>
+</html>
+
+
+<script src="sat.js"></script>
+<script>
+
+// let formula = new Formula();
+// formula.addClause(new Clause("p", "q", "!r", "s"));
+// formula.addClause(new Clause("!q", "!r", "s"));
+// formula.addClause(new Clause("r"));
+// formula.addClause(new Clause("!p", "!s"));
+// formula.addClause(new Clause("!p", "r"));
+// console.log(formula.toString());
+
+
+//let res = SatSolver.formulaIsSolveable(formula);
+//console.log(res);
+//let solution = SatSolver.findSatisfyingSolution(formula);
+//console.log(solution.solution);
+
+
+
+class Sudoku {
+  constructor(size) {
+    this.formula = new Formula();
+    this.size = size;
+    this.field = [];
+    for (let y = 0; y < size; y++) {
+      this.field.push([]);
+      for (let x = 0; x < size; x++) {
+        this.field[y].push(-1);
+      }
+    }
+  }
+  setNumber(num, x, y) {
+    this.field[y-1][x-1] = num;
+    this.formula.addClause(new Clause(this.getLiteralName(num, x, y)));
+  }
+  getLiteralName(num, x, y) {
+    return num + "(" + x + "/" + y + ")";
+  }
+  constructFormula() {
+    // Jede Zahl kommt in jeder Zeile vor
+    for (let x = 0; x < 9; x++) {
+      for (let z = 0; z < 9; z++) {
+        let clause = new Clause();
+        for (let i = 0; i < 9; i++) {
+          clause.addLiteral(this.getLiteralName(x+1, i+1, z+1));
+        }
+        this.formula.addClause(clause);
+      }
+    }
+
+    // Jede Zahl kommt in jeder Spalte vor
+    for (let x = 0; x < 9; x++) {
+      for (let z = 0; z < 9; z++) {
+        let clause = new Clause();
+        for (let i = 0; i < 9; i++) {
+          clause.addLiteral(this.getLiteralName(x+1, z+1, i+1));
+        }
+        this.formula.addClause(clause);
+      }
+    }
+
+    // Jede Zahl kommt in jedem Quadrat vor
+    for (let x = 0; x < 9; x++) {
+      for (let ss = 0; ss < 9; ss += 3) {
+        for (let zs = 0; zs < 9; zs += 3) {
+          let clause = new Clause();
+          for (let z = zs; z < zs+3; z++) {
+            for (let s = ss; s < ss+3; s++) {
+              clause.addLiteral(this.getLiteralName(x+1, s+1, z+1));
+            }
+          }
+          this.formula.addClause(clause);
+        }
+      }
+    }
+
+    // Jedes Feld enthält höchstens eine Zahl
+    for (let z = 0; z < 9; z++) {
+      for (let s = 0; s < 9; s++) {
+        for (let x = 0; x < 9; x++) {
+          for (let y = 0; y < 9; y++) {
+            if (x != y) {
+              let clause = new Clause();
+              clause.addLiteral("!" + this.getLiteralName(x+1, s+1, z+1));
+              clause.addLiteral("!" + this.getLiteralName(y+1, s+1, z+1));
+              this.formula.addClause(clause);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+let game = new Sudoku(9);
+game.setNumber(4, 1, 1);
+game.setNumber(9, 5, 1);
+game.setNumber(2, 9, 1);
+game.setNumber(1, 3, 2);
+game.setNumber(5, 7, 2);
+game.setNumber(9, 2, 3);
+game.setNumber(3, 4, 3);
+game.setNumber(4, 5, 3);
+game.setNumber(5, 6, 3);
+game.setNumber(1, 8, 3);
+game.setNumber(8, 3, 4);
+game.setNumber(2, 7, 4);
+game.setNumber(5, 8, 4);
+game.setNumber(7, 1, 5);
+game.setNumber(5, 3, 5);
+game.setNumber(3, 5, 5);
+game.setNumber(4, 7, 5);
+game.setNumber(6, 8, 5);
+game.setNumber(1, 9, 5);
+game.setNumber(4, 2, 6);
+game.setNumber(6, 3, 6);
+game.setNumber(9, 7, 6);
+game.setNumber(8, 9, 6);
+game.setNumber(6, 2, 7);
+game.setNumber(1, 4, 7);
+game.setNumber(5, 5, 7);
+game.setNumber(9, 6, 7);
+game.setNumber(8, 8, 7);
+game.setNumber(9, 3, 8);
+game.setNumber(6, 7, 8);
+game.setNumber(5, 1, 9);
+game.setNumber(7, 5, 9);
+game.setNumber(4, 9, 9);
+
+game.constructFormula();
+let res = SatSolver.findSatisfyingSolution(game.formula);
+console.log(res);
+
+</script>

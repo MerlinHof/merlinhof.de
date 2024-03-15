@@ -1,0 +1,771 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Subleq Assembler & Emulator</title>
+      <meta name="description" content="An assembler which converts normal assembly code into instructions for subleq OISC One Instruction Set Computers. Including an efficient subleq emulator." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/subleq/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <t class="title">Subleq Assembler</t><br />
+      <div class="button" id="architectureButton" onclick="window.location.href='architecture.html'">ARCHITECTURE</div>
+      <div class="button" id="examplesButton" onclick="window.location.href='examples.html'">EXAMPLES</div>
+      <div class="button" id="infoButton" onclick="window.location.href='info.html'">?</div>
+      <br />
+      <div class="foreground textarea" id="editor"></div>
+      <div contenteditable="true" id="editorOverlay" oninput="removeHTML(); updateEditor();" onscroll="syncScroll();"></div>
+      <div class="button" type="button" id="compileButton" onclick="startAssembling();">ASSEMBLE</div>
+      <div class="button" type="button" id="emulatorButton" onclick="window.location.href='emulator.html'">EMULATOR</div>
+      <br />
+      <div id="outputContainer"><t id="output"></t></div>
+
+      <div id="errorDialogContainer" onClick="hideErrorDialog();"><t id="errorTitle">ERROR</t><br /><t id="errorText">An error occured</t></div>
+   </body>
+</html>
+
+<script src="highlighting.js"></script>
+<script>
+   document.body.setAttribute("spellcheck", false);
+   document.getElementById("editorOverlay").focus();
+
+   // -------------------------------------------------------------------------------------------------------------------------
+   // UI STUFF
+   // -------------------------------------------------------------------------------------------------------------------------
+   setTimeout(() => {
+      window.scrollTo(0, 0);
+      let editor = document.getElementById("editor");
+      let caretHolder = document.getElementById("editorOverlay");
+      caretHolder.style.top = editor.offsetTop + document.body.scrollTop;
+      caretHolder.style.left = editor.offsetLeft;
+      caretHolder.style.width = editor.offsetWidth;
+      caretHolder.style.height = editor.offsetHeight;
+   }, 200);
+
+   function showErrorDialog(message) {
+      document.getElementById("errorDialogContainer").style.display = "flex";
+      setTimeout(() => {
+         document.getElementById("errorDialogContainer").style.opacity = "1.0";
+         document.getElementById("errorTitle").style.transform = "scale(1.0, 1.0)";
+         document.getElementById("errorText").style.transform = "scale(1.0, 1.0)";
+         document.getElementById("errorText").innerText = message;
+      }, 10);
+   }
+
+   function hideErrorDialog() {
+      document.getElementById("errorDialogContainer").style.opacity = "0.0";
+      document.getElementById("errorTitle").style.transform = "scale(0.0, 0.0)";
+      document.getElementById("errorText").style.transform = "scale(0.0, 0.0)";
+      setTimeout(() => {
+         document.getElementById("errorDialogContainer").style.display = "none";
+      }, 500);
+   }
+
+   function error(message) {
+      showErrorDialog(message);
+      assemblerError = true;
+   }
+
+   function removeHTML() {
+      let ih = document.getElementById("editorOverlay").innerHTML;
+      if (ih.includes("<font") && ih.includes("</font>")) {
+         document.getElementById("editorOverlay").innerText = document.getElementById("editorOverlay").innerText;
+      }
+   }
+
+   function startAssembling() {
+      start();
+      let scrollPos = document.body.scrollTop;
+      let maxScrollPos = document.body.scrollHeight;
+      let interval = setInterval(() => {
+         scrollPos += 10;
+         window.scrollTo(0, scrollPos);
+         if (scrollPos > 500 || scrollPos > maxScrollPos) clearInterval(interval);
+      }, 1000 / 60);
+   }
+
+   // -------------------------------------------------------------------------------------------------------------------------
+   // ASSEMBLER
+   // -------------------------------------------------------------------------------------------------------------------------
+   document.getElementById("editorOverlay").innerHTML = `
+JMP start<br>
+<br>
+msg:<br>
+DB "Hello World"<br>
+DB 0<br>
+<br>
+start:<br>
+MOV A, msg<br>
+MOV B, heapbase<br>
+<br>
+loop:<br>
+MOV [B], [A]<br>
+INC A<br>
+INC B<br>
+BLE [A], 0, end<br>
+JMP loop<br>
+<br>
+end:<br>
+HLT`;
+   updateEditor();
+
+   // ----------------------------------------------------------------------------
+   // SUPPORTED INSTRUCTIONS
+   // - DB (✔)
+   // - ADD (✔)
+   // - SUB (✔)
+   // - CLR (✔)
+   // - JMP (✔)
+   // - HLT (✔)
+   // - BLE (✔)
+   // - BGE (✔)
+   // - BGT (✔)
+   // - BLT (✔)
+   // - BEQ (✔)
+   // - BNE (✔)
+   // - MUL (✔)
+   // - DIV (✔)
+   // - MOD (✔)
+   // - CALL (✔)
+   // - RET (✔)
+   // - PUSH (✔)
+   // - POP (✔)
+   // - MOV (✔)
+   // - INC (✔)
+   // - DEC (✔)
+   // - NEG
+   // - AND
+   // - OR
+   // - XOR
+   // - NOT
+   // - SHL
+   // - SHR
+   // - #define (✔)
+   // - #macro (✔)
+
+   // TECHNIQUES
+   // - Stack (✔)
+   // - Pointers (✔)
+   // - Registers (✔)
+   // - Heap (✔)
+   // - Offsets / Scalers
+
+   // Required Variables
+   let lines = [];
+   let constants = [];
+   let constantIDs = [];
+   let randomIDs = [];
+   let asm = "";
+   let registers = ["a", "b", "c", "d", "e", "f", "g", "sp", "z0", "z1", "z2", "z3", "z4"];
+   let assemblerError = false;
+   let stackSize = 32;
+
+   // -------------------------------------------------------------------------------------------------------------------------
+   // STAGE 1
+   // Converts all ASM instructions into minimal ones in three steps, handle assembler instructions
+   // -------------------------------------------------------------------------------------------------------------------------
+
+   function start() {
+      asm = "";
+      lines = [];
+      constants = [];
+      constantIDs = [];
+      randomIDs = [];
+      assemblerError = false;
+      asm = document.getElementById("editorOverlay").innerText;
+      lines = asm.split("\n");
+
+      // Remove comments, special chars and empty lines
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+         if (line.includes(";")) {
+            let ind = line.indexOf(";");
+            line = line.substring(0, ind);
+         }
+         line = line.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+         if (line.includes('"')) {
+            lines[i] = line.substring(0, line.indexOf('"')).toLowerCase() + line.substring(line.indexOf('"'), line.length);
+         } else {
+            line = line.replaceAll("_", "®");
+            lines[i] = line.toLowerCase();
+         }
+         lines[i] = lines[i].trim();
+         if (line == "") {
+            lines.splice(i, 1);
+            i--;
+         }
+      }
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+      console.log("%c1. Processed Assembly Program:", "color: blue; background-color: rgba(100, 150, 255, 0.1); padding: 4px; padding-right: 100px;");
+      console.log(asm);
+
+      // Assembler instructions
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // #define
+         if (line.substring(0, 8) == "#define ") {
+            line = line.substring(8, line.length);
+            let name = line.substring(0, line.indexOf(" ")).trim();
+            let value = line.substring(line.indexOf(" ") + 1, line.length).trim();
+            lines[i] = "";
+
+            for (let j = 0; j < lines.length; j++) {
+               lines[j] = lines[j].replaceAll(name, value);
+            }
+         }
+
+         // #macro
+         if (line.substring(0, 7) == "#macro ") {
+            line = line.substring(7, line.length);
+            let name = line.substring(0, line.indexOf(" "));
+            let parameters = [];
+            line = line.substring(line.indexOf(" ") + 1, line.length);
+            while (line.includes(", ")) {
+               parameters.push(line.substring(0, line.indexOf(", ")));
+               line = line.substring(line.indexOf(", ") + 2, line.length);
+            }
+            parameters.push(line.substring(0, line.length));
+            lines[i] = "";
+
+            let content = "";
+            for (let j = i + 1; j < lines.length; j++) {
+               if (lines[j] == "#end") {
+                  lines[j] = "";
+                  break;
+               } else {
+                  content += lines[j] + "\n";
+                  lines[j] = "";
+               }
+            }
+
+            for (let j = 0; j < parameters.length; j++) {
+               let id = generateID();
+               content = content.replaceAll(parameters[j], "macrovar" + id);
+               parameters[j] = id;
+            }
+
+            for (let j = 0; j < lines.length; j++) {
+               lines[j] = lines[j].trim();
+               if (lines[j].substring(0, name.length + 1) == name + " ") {
+                  let originalLine = lines[j];
+                  let params = [];
+                  lines[j] = lines[j].substring(name.length + 1, lines[j].length);
+                  while (lines[j].includes(", ")) {
+                     params.push(lines[j].substring(0, lines[j].indexOf(", ")));
+                     lines[j] = lines[j].substring(lines[j].indexOf(", ") + 2, lines[j].length);
+                  }
+                  params.push(lines[j].substring(0, lines[j].length));
+
+                  if (parameters.length != params.length) {
+                     error("Invalid number of arguments in line:\n\n" + originalLine);
+                  }
+
+                  lines[j] = content;
+                  for (let k = 0; k < parameters.length; k++) {
+                     lines[j] = lines[j].replaceAll("macrovar" + parameters[k], params[k]);
+                  }
+
+                  asm = lines.join("\n");
+                  lines = asm.split("\n");
+               }
+            }
+         }
+      }
+
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+         lines[i] = lines[i].trim();
+         if (lines[i] == "") {
+            lines.splice(i, 1);
+            i--;
+         }
+      }
+
+      // Replacing highest level ASM instructions with high level ones
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // CALL's -> push addr; jmp arg
+         if (line.substring(0, 5) == "call ") {
+            let arg = line.substring(5, line.length);
+            let id = generateID();
+            line = "push call" + id;
+            line += "\njmp " + arg;
+            line += "\ncall" + id + ":";
+         }
+
+         // RET's -> pop z2, jmp z2
+         if (line == "ret") {
+            let arg = line.substring(4, line.length);
+            line = "pop z2\n";
+            line += "jmp [z2]";
+         }
+
+         lines[i] = line;
+      }
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+
+      // Replacing high level asm instructions with lower level ones
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // PUSH's -> mov [sp], arg; inc sp
+         if (line.substring(0, 5) == "push ") {
+            let arg = line.substring(5, line.length);
+            line = "mov [sp], " + arg;
+            line += "\ninc sp";
+         }
+
+         // POP's -> dec sp; mov arg, [sp]
+         if (line.substring(0, 4) == "pop ") {
+            let arg = line.substring(4, line.length);
+            line = "dec sp\n";
+            line += "mov " + arg + ", [sp]";
+         }
+
+         // MUL's -> loop
+         if (line.substring(0, 4) == "mul ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.length).trim();
+            let id = generateID();
+            line = "clr z2\n";
+            line += "mov z3, " + a + "\n";
+            line += "loopstart" + id + ":\n";
+            line += "add " + a + ", z3\n";
+            line += "sub z2, -1\n";
+            line += "mov z4, z2\n";
+            line += "add z4, 2\n";
+            line += "ble z4, " + b + ", loopstart" + id;
+         }
+
+         // DIV's -> loop
+         if (line.substring(0, 4) == "div ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.length).trim();
+            let id = generateID();
+            line = "clr z3\n";
+            line += "mov z4, " + a + "\n";
+            line += "loopstart" + id + ":\n";
+            line += "sub z4, " + b + "\n";
+            line += "sub z3, -1\n";
+            line += "blt z4, 0, loopend" + id + "\n";
+            line += "jmp loopstart" + id + "\n";
+            line += "loopend" + id + ":\n";
+            line += "sub z3, 1\n";
+            line += "mov " + a + ", z3";
+         }
+
+         // MOD's -> loop
+         if (line.substring(0, 4) == "mod ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.length).trim();
+            let id = generateID();
+            line = "mov z3, " + a + "\n";
+            line += "loopstart" + id + ":\n";
+            line += "sub z3, " + b + "\n";
+            line += "blt z3, 0, loopend" + id + "\n";
+            line += "jmp loopstart" + id + "\n";
+            line += "loopend" + id + ":\n";
+            line += "add z3, " + b + "\n";
+            line += "mov " + a + ", z3";
+         }
+
+         // BEQ -> BLE AND BGE
+         if (line.substring(0, 4) == "beq ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let c = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+
+            let id = generateID();
+            line = "ble " + b + ", " + a + ", beq1" + id + "\n";
+            line += "jmp exit" + id + "\n";
+            line += "beq1" + id + ":\n";
+            line += "bge " + b + ", " + a + ", beq2" + id + "\n";
+            line += "jmp exit" + id + "\n";
+            line += "beq2" + id + ":\n";
+            line += "jmp " + c + "\n";
+            line += "exit" + id + ":";
+         }
+
+         // BNE -> BLT OR BGT
+         if (line.substring(0, 4) == "bne ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let c = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+            line = "blt " + a + ", " + b + ", " + c + "\n";
+            line += "bgt " + a + ", " + b + ", " + c;
+         }
+
+         lines[i] = line;
+      }
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+
+      // Replacaing lower level asm instructions with basic ones
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // MOV's -> clr; add
+         if (line.substring(0, 4) == "mov ") {
+            line = line.substring(4, line.length);
+            let dst = line.substring(0, line.indexOf(",")).trim();
+            let src = line.substring(line.indexOf(",") + 1, line.length).trim();
+            line = "clr " + dst;
+            line += "\nadd " + dst + ", " + src;
+         }
+
+         // INC's -> sub -1
+         if (line.substring(0, 4) == "inc ") {
+            line = "sub " + line.substring(4, line.length).trim() + ", -1";
+         }
+
+         // DEC's -> sub 1
+         if (line.substring(0, 4) == "dec ") {
+            line = "sub " + line.substring(4, line.length).trim() + ", 1";
+         }
+
+         // BLT -> BLE -1
+         if (line.substring(0, 4) == "blt ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let c = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+            line = "clr z2\n";
+            line += "add z2, " + b + "\n";
+            line += "sub z2, 1\n";
+            line += "ble " + a + ", z2, " + c;
+         }
+
+         // BGE -> BLE SWAP
+         if (line.substring(0, 4) == "bge ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let c = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+            line = "ble " + b + ", " + a + ", " + c;
+         }
+
+         // BGT -> BLE SWAP and +1
+         if (line.substring(0, 4) == "bgt ") {
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let c = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+            line = "clr z2\n";
+            line += "add z2, " + b + "\n";
+            line += "sub z2, -1\n";
+            line += "ble z2, " + a + ", " + c;
+         }
+
+         lines[i] = line;
+      }
+
+      lines.splice(0, 0, "add sp, stackbase");
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+      console.log("");
+      console.log("%c2. Simplified Program:", "color: blue; background-color: rgba(100, 150, 255, 0.1); padding: 4px; padding-right: 100px;");
+      console.log(asm);
+      assemble();
+   }
+
+   // -------------------------------------------------------------------------------------------------------------------------
+   // STAGE 2
+   // Assembles boiled down ASM to SUBLEQ
+   // -------------------------------------------------------------------------------------------------------------------------
+   function assemble() {
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // DB's
+         if (line.substring(0, 3) == "db ") {
+            if (line.includes('"')) {
+               line = line.substring(4, line.length - 1);
+               let tmpLine = "";
+               for (let j = 0; j < line.length; j++) {
+                  tmpLine += line.substring(j, j + 1).charCodeAt(0) + " ";
+               }
+               line = tmpLine.trim();
+            } else {
+               line = line.substring(3, line.length).trim();
+            }
+         }
+
+         // ADD's and SUB's
+         if (line.substring(0, 4) == "add " || line.substring(0, 4) == "sub ") {
+            let isAddition = true;
+            if (line.substring(0, 4) == "sub ") {
+               isAddition = false;
+            }
+            line = line.substring(4, line.length);
+            let a = line.substring(0, line.indexOf(",")).trim();
+            let b = line.substring(line.indexOf(",") + 1, line.length).trim();
+            line = "";
+
+            let ret = convertToAddress(a, 0);
+            line = ret.code;
+            a = ret.arg;
+
+            ret = convertToAddress(b, 0);
+            line += ret.code;
+            b = ret.arg;
+
+            if (isAddition) {
+               line += "z0 z0 ?\n";
+               line += b + " z0 ?\n";
+               line += "z0 " + a + " ?";
+            } else {
+               line += b + " " + a + " ?";
+            }
+         }
+
+         // CLR's
+         if (line.substring(0, 4) == "clr ") {
+            line = line.substring(4, line.length);
+            if (line.substring(0, 1) == "[") {
+               let arg = line.substring(1, line.length - 1);
+
+               // Pointer
+               let arg1ID = generateID();
+               let arg2ID = generateID();
+               let repl1 = "pointer" + arg1ID;
+               let repl2 = "pointer" + arg2ID;
+               line = "z0 z0 ?\n";
+               line += repl1 + " " + repl1 + " ?\n";
+               line += repl2 + " " + repl2 + " ?\n";
+               line += arg + " z0 ?\n";
+               line += "z0 " + repl1 + " ?\n";
+               line += "z0 " + repl2 + " ?\n";
+               line += "pointer" + arg1ID + ":\n0\npointer" + arg2ID + ":\n0 ?";
+            } else {
+               // Address
+               line = line + " " + line + " ?";
+            }
+         }
+
+         // BLE's
+         if (line.substring(0, 4) == "ble ") {
+            line = line.substring(4, line.length);
+            let arg1 = line.substring(0, line.indexOf(",")).trim();
+            let arg2 = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).trim();
+            let address = line.substring(line.lastIndexOf(",") + 1, line.length).trim();
+
+            let ret = convertToAddress(arg1, 0);
+            line = ret.code;
+            arg1 = ret.arg;
+
+            ret = convertToAddress(arg2, 0);
+            line += ret.code;
+            arg2 = ret.arg;
+
+            ret = convertToAddress(address, 1);
+            line += ret.code;
+            address = ret.arg;
+
+            line += "z0 z0 ?\n";
+            line += "z1 z1 ?\n";
+            line += arg1 + " z1 ?\n";
+            line += "z1 z0 ?\n";
+            line += arg2 + " z0 " + address;
+         }
+
+         // JMP's
+         if (line.substring(0, 4) == "jmp ") {
+            line = line.substring(4, line.length);
+            let ret = convertToAddress(line, 1);
+            line = ret.code;
+            line += "z0 z0 " + ret.arg;
+         }
+
+         // HLT's
+         if (line == "hlt") {
+            line = "z0 z0 ??";
+         }
+
+         lines[i] = line;
+      }
+
+      asm = lines.join("\n");
+      lines = asm.split("\n");
+      console.log("");
+      console.log("%c3. Pseudo Subleq Structure:", "color: blue; background-color: rgba(100, 150, 255, 0.1); padding: 4px; padding-right: 100px;");
+      console.log(asm);
+
+      // Add register Labels
+      for (let i = 0; i < registers.length; i++) {
+         lines.push(registers[i] + ":");
+         lines.push("0");
+      }
+      replaceAddresses();
+   }
+
+   // Creates constants
+   function createConstant(c) {
+      let id = generateID();
+      if (!constants.includes(c)) {
+         lines.push("const" + id + ":");
+         lines.push(c);
+         constants.push(c);
+         constantIDs.push(id);
+      }
+      return "const" + constantIDs[constants.indexOf(c)];
+   }
+
+   // Generates random ID
+   function generateID() {
+      let newValue;
+      do {
+         newValue = Math.floor(Math.random() * 99999999999);
+      } while (randomIDs.includes(newValue));
+      randomIDs.push(newValue);
+      return newValue;
+   }
+
+   // Converts an argument (Label, Address, Pointer, Register) to address
+   function convertToAddress(argx, labelmode) {
+      let line = "";
+      let arg = argx;
+      if (!isNaN(arg)) {
+         // Decimal Constant
+         arg = createConstant(arg);
+      } else {
+         // Pointer
+         if (arg.substring(0, 1) == "[") {
+            arg = arg.substring(1, arg.length - 1);
+            if (!registers.includes(arg)) {
+               if (labelmode == 0) {
+                  arg = createConstant(arg);
+               }
+            }
+            let argID = generateID();
+            let repl = "pointer" + argID;
+            line = "z0" + " " + "z0" + " ?\n";
+            line += repl + " " + repl + " ?\n";
+            line += arg + " " + "z0" + " ?\n";
+            line += "z0" + " " + repl + " ?\n";
+            arg = "pointer" + argID + ":\n0";
+         } else if (!registers.includes(arg)) {
+            if (labelmode == 0) {
+               arg = createConstant(arg);
+            }
+         }
+      }
+
+      return { code: line, arg: arg };
+   }
+
+   // -------------------------------------------------------------------------------------------------------------------------
+   // STAGE 3
+   // Replace all assembler tags with actual addresses
+   // -------------------------------------------------------------------------------------------------------------------------
+
+   function replaceAddresses() {
+      asm = lines.join(" ");
+      lines = asm.split(" ");
+
+      // Remove labels
+      let labelAddresses = [];
+      let labelAddressesStrings = [];
+      for (let i = 0; i < lines.length; i++) {
+         if (lines[i].substring(lines[i].length - 1, lines[i].length) == ":") {
+            labelAddresses.push({ name: lines[i].substring(0, lines[i].length - 1), address: i });
+            labelAddressesStrings.push(i + ": " + lines[i].substring(0, lines[i].length - 1));
+            lines.splice(i, 1);
+            i--;
+         }
+      }
+      console.log("");
+      console.log("%c4. Addresses of Labels:", "color: blue; background-color: rgba(100, 150, 255, 0.1); padding: 4px; padding-right: 100px;");
+      console.log(labelAddressesStrings.join("\n"));
+
+      // Actual Addresses
+      for (let i = 0; i < lines.length; i++) {
+         let line = lines[i];
+
+         // Pointers
+         if (line.substring(0, 6) == "addrto") {
+            line = lines.indexOf(line.substring(6, line.length)) + "";
+         }
+         if (line.substring(0, 1) == "[") {
+            line = "0";
+         }
+
+         // Next Address
+         if (line == "?") {
+            line = i + 1 + "";
+         }
+
+         // My Address
+         if (line == "??") {
+            line = i - 2 + "";
+         }
+
+         // Label addresses
+         if (isNaN(line)) {
+            for (let j = 0; j < labelAddresses.length; j++) {
+               if (labelAddresses[j].name == line) {
+                  line = labelAddresses[j].address + "";
+                  break;
+               }
+            }
+         }
+
+         // Set Base Address of Stack
+         if (line == "stackbase") {
+            line = lines.length + "";
+         }
+
+         // Set Base Address of Heap
+         if (line == "heapbase") {
+            line = lines.length + stackSize + "";
+         }
+
+         lines[i] = line;
+      }
+
+      // Put together
+      let subleq = lines.join(" ");
+      console.log("");
+      console.log("%c5. Completed Subleq Code:", "color: blue; background-color: rgba(100, 150, 255, 0.1); padding: 4px; padding-right: 100px;");
+      console.log(subleq);
+      let finalString = "";
+      for (let i = 0; i < lines.length; i++) {
+         finalString += lines[i];
+         finalString += " ";
+         if (isNaN(lines[i])) {
+            error("Unknown instruction: " + lines[i]);
+            break;
+         }
+      }
+      if (assemblerError) {
+         document.getElementById("output").innerHTML = "";
+      } else {
+         document.getElementById("output").innerText = finalString;
+         copyToClipboard(finalString.trim());
+      }
+   }
+
+   function copyToClipboard(str) {
+      let area = document.createElement("textarea");
+      area.value = str;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      document.body.removeChild(area);
+   }
+
+   String.prototype.replaceAll = function (search, replacement) {
+      return this.split(search).join(replacement);
+   };
+</script>

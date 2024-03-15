@@ -1,0 +1,141 @@
+*{
+  -webkit-user-select: text;
+}
+
+body {
+  padding-bottom: 0px;
+}
+
+/* .text {
+  color: #ffffff;
+  opacity: 1.0;
+  margin-top: 20px;
+} */
+
+.textarea {
+  color: #ffffff;
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--borderRadius);
+  outline: none;
+  resize: none;
+  padding: 10px;
+  margin-top: 10px;
+  height: calc(100% - 240px);
+  white-space: nowrap;
+  overflow: scroll;
+  white-space: pre-line;
+}
+
+.button {
+  margin-top: 10px;
+}
+
+#architectureButton, #examplesButton, #infoButton {
+  background-image: none;
+  box-shadow: none;
+  background-color: rgb(35, 45, 60);
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+#compileButton, #emulatorButton {
+  margin-top: 20px;
+}
+
+#output {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  color: #ffffff;
+  opacity: 1.0;
+  font-size: 20px;
+}
+
+#errorDialogContainer {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(17, 19, 25, 0.0);
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: all 0.5s;
+  opacity: 0.0;
+  display: none;
+}
+#errorTitle {
+  font-size: 32px;
+  color: red;
+  transform: scale(0.0, 0.0);
+  transition: all 0.5s;
+  margin-bottom: 50px;
+}
+#errorText {
+  font-size: 24px;
+  color: white;
+  transform: scale(0.0, 0.0);
+  transition: all 0.5s;
+  text-align: center;
+}
+
+#editorOverlay {
+  background-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
+  position: absolute;
+  -webkit-caret-color: white;
+  caret-color: white;
+  border-style: none;
+  outline: none;
+  resize: none;
+  padding: 10px;
+  box-sizing: border-box;
+  margin-top: 0px;
+  white-space: nowrap;
+  overflow: scroll;
+}
+
+
+/* Light mode*/
+@media (prefers-color-scheme: light) {
+  #architectureButton, #examplesButton, #infoButton {
+    background-color: #eceff1;
+    color: rgba(0, 0, 0, 1);
+  }
+  .textarea {
+    color: #000000;
+  }
+  .title {
+    color: #000000;
+  }
+  .text {
+    color: #000000;
+    opacity: 1.0;
+  }
+  #outputTitle {
+    color: #000000;
+  }
+  #output {
+    color: #000000;
+  }
+  #errorText {
+    color: black;
+  }
+  #editorOverlay {
+    -webkit-caret-color: black;
+    caret-color: black;
+  }
+}
+
+
+/* Mobile mode */
+@media only screen and (max-width: 640px) {
+  .textarea {
+    width: calc(100% - 20px);
+  }
+}

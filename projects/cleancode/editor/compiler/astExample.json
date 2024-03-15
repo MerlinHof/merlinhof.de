@@ -1,0 +1,166 @@
+var x = 1+(2-3*4)/5*6
+var name = "Merlin"
+var height = 1.75
+var age = 19
+var xxx = 2*getAge(31, 4+age*8/2)+6
+
+[
+  {
+    "description": "varDec",
+    "name": "x",
+    "value": {
+      "description": "expression",
+      "type": "unknown",
+      "operator": "+",
+      "leftBranch": {
+        "description":"value",
+        "type":"int",
+        "value":"1"
+      },
+      "rightBranch": {
+        "description":"expression",
+        "type":"unknown",
+        "operator":"/",
+        "leftBranch": {
+          "description":"group",
+          "type":"unknown",
+          "value": {
+            "description":"expression",
+            "type":"unknown",
+            "operator":"-",
+            "leftBranch": {
+              "description":"value",
+              "type":"int",
+              "value":"2"
+            },
+            "rightBranch":{
+              "description":"expression",
+              "type":"unknown",
+              "operator":"*",
+              "leftBranch": {
+                "description":"value",
+                "type":"int",
+                "value":"3"
+              },
+              "rightBranch": {
+                "description":"value",
+                "type":"int",
+                "value":"4"
+              }
+            }
+          }
+        },
+        "rightBranch":{
+          "description":"expression",
+          "type":"unknown",
+          "operator":"*",
+          "leftBranch": {
+            "description":"value",
+            "type":"int",
+            "value":"5"
+          },
+          "rightBranch": {
+            "description":"value",
+            "type":"int",
+            "value":"6"
+          }
+        }
+      }
+    }
+  },
+  {
+    "description":"varDec",
+    "name":"name",
+    "value": {
+      "description":"value",
+      "type":"string",
+      "value":"\"Merlin\""
+    }
+  },
+  {
+    "description":"varDec",
+    "name":"height",
+    "type":"float",
+    "value":"1.75"
+  },
+  {
+    "description":"varDec",
+    "name":"age",
+    "value": {
+      "description":"value",
+      "type":"int",
+      "value":"19"
+    }
+  },
+  {
+    "description":"varDec",
+    "name":"xxx",
+    "value": {
+      "description":"expression",
+      "type":"unknown",
+      "operator":"+",
+      "leftBranch": {
+        "description":"expression",
+        "type":"unknown",
+        "operator":"*",
+        "leftBranch": {
+          "description":"value",
+          "type":"int",
+          "value":"2"
+        },
+        "rightBranch": {
+          "description":"functioncall",
+          "type":"unknown",
+          "name":"getAge",
+          "args": [
+            {
+              "description":"value",
+              "type":"int",
+              "value":"31"
+            },
+            {
+              "description":"expression",
+              "type":"unknown",
+              "operator":"+",
+              "leftBranch": {
+                "description":"value",
+                "type":"int",
+                "value":"4"
+              },
+              "rightBranch": {
+                "description":"expression",
+                "type":"unknown",
+                "operator":"*",
+                "leftBranch": {
+                  "description":"variable",
+                  "type":"unknown",
+                  "value":"age"
+                },
+                "rightBranch": {
+                  "description":"expression",
+                  "type":"unknown",
+                  "operator":"/",
+                  "leftBranch": {
+                    "description":"value",
+                    "type":"int",
+                    "value":"8"
+                  },
+                  "rightBranch": {
+                    "description":"value",
+                    "type":"int",
+                    "value":"2"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "rightBranch": {
+        "description":"value",
+        "type":"int",
+        "value":"6"
+      }
+    }
+  }
+]

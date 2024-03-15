@@ -1,0 +1,57 @@
+.title {
+  margin-bottom: 0px;
+}
+
+.textarea {
+  -webkit-user-select: text;
+  font-size: 24px;
+  width: 100%;
+  max-width: 700px;
+  border-radius: var(--borderRadius);
+  outline: none;
+  resize: none;
+  padding: 10px;
+  overflow: auto;
+}
+
+#text {
+  font-size: 24px;
+  margin-top: 10px;
+  height: 50%;
+}
+
+#decryptButton {
+  margin-left: 5px;
+}
+
+#output {
+  -webkit-user-select: text;
+  display: inline-block;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.button {
+  margin-bottom: 10px;
+}
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+  .textarea {
+    color: #ffffff;
+  }
+}
+
+
+/* Mobile mode */
+@media only screen and (max-width:640px) {
+  #text {
+    width: 100%;
+  }
+  #key {
+    width: 100%;
+  }
+  #outputContainer {
+    width: 100%;
+  }
+}

@@ -1,0 +1,101 @@
+:root {
+  --cellColor: rgb(210, 220, 230);
+  --textColor: #000000;
+  --highlightTextColor: #ffffff;
+}
+
+.textarea {
+  -webkit-user-select: text;
+  color: #000000;
+  font-size: 24px;
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--borderRadius);
+  outline: none;
+  resize: none;
+  padding: 10px;
+  overflow: auto;
+  height: calc(100% - 250px);
+}
+
+.ramCell {
+  font-size: 20px;
+  display: block;
+  text-align: center;
+  width: 55px;
+  float: left;
+  color: #000000;
+  opacity: 1.0;
+  border-radius: 5px;
+  margin-right: 3px;
+  margin-bottom: 3px;
+  background-color: #eceff1;
+}
+
+.ramRow {
+  width: 100%;
+  display: inline-block;
+}
+
+#inputram, #inputclock, #inputbase {
+  font-size: 24px;
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 40px;
+  width: 80px;
+  text-align: center;
+}
+
+#settingsContainer {
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.settingsElement {
+  float: left;
+  margin-top: 20px;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#startButton {
+  clear: both;
+  float: left;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cellColor: rgb(50, 60, 75);
+    --textColor: #ffffff;
+    --highlightTextColor: #ffffff;
+  }
+  .textarea {
+    color: #ffffff;
+  }
+  .title {
+    color: #ffffff;
+  }
+  .text {
+    color: #ffffff;
+  }
+  .ramCell {
+    color: #ffffff;
+    background-color: rgb(25, 35, 50);
+  }
+}
+
+
+/* Mobile mode */
+@media only screen and (max-width:640px) {
+  .textarea {
+    width: 100%;
+  }
+}

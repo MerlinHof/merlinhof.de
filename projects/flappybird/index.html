@@ -1,0 +1,247 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Flappy Bird AI</title>
+      <meta name="description" content="An AI trains itself to play the game of flappy bird." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/flappybird/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas"></canvas><br />
+      <div id="controlContainer">
+         <t class="title" id="generationCounter"></t>
+         <t class="text" id="aliveCounter"></t>
+         <div id="speedControlContainer" onclick="toggleSpeed()">
+            <img id="speedControlImage" src="snail.png" />
+         </div>
+         <div style="flex-grow: 1"></div>
+         <t class="title" id="scoreCounter"></t>
+         <t class="text" id="maxScore">-</t>
+      </div>
+      <div id="disclaimerContainer">
+         <!-- <t class="title">What you are about to see</t> -->
+         <t class="title">Experience the Evolution of Birds Through Artificial Neural Networks</t>
+         <t class="text"
+            >Prepare to witness the fascinating evolution of a thousand birds, each guided by its own artificial neural network. These birds belong to the first generation and start their journey
+            without any prior knowledge, purely at random. Most will unfortunately collide with the first obstacle they come across. However, one bird, with slightly better genetics, will manage to
+            survive a tiny bit longer than the rest. This fortunate bird's genetic code will be replicated to create a new generation. In this process, a small part of the new birds' DNA will undergo
+            random mutations. This is how the second generation comes into being, and the cycle repeats, building upon previous progress and improving with each iteration until we see birds that can
+            skillfully avoid all obstacles. Sometimes, this evolution takes as few as ten generations; other times, it might require up to a hundred. Observe the birds evolve and enjoy the process!</t
+         >
+         <div class="button" onclick="beginTraining()">START</div>
+      </div>
+   </body>
+</html>
+
+<script src="nn.js"></script>
+<script>
+   // Prepare Canvas
+   let canvas = document.getElementById("canvas");
+   let height = canvas.clientHeight;
+   let width = canvas.clientWidth;
+   let ctx = canvas.getContext("2d");
+   let pixelFactor = window.devicePixelRatio;
+   canvas.setAttribute("height", height * pixelFactor);
+   canvas.setAttribute("width", width * pixelFactor);
+   ctx.scale(pixelFactor, pixelFactor);
+
+   // Variables
+   let obstacles = [];
+   let obstacleWidth = 50;
+   let generationSize = 1000;
+   let generationCounter = 0;
+   let birds = [];
+   let distanceFlown = 0;
+   let maxDistanceFlown = 0;
+   let birdPos = 100;
+   let birdSize = 50;
+   let bestBird;
+   let colors = ["rgb(0, 160, 255)", "rgba(0, 160, 255, 0.1)", "rgb(0, 160, 120)", "rgb(0, 210, 170)", "rgb(0, 210, 170)", "rgb(0, 0, 0)"];
+   let obstacleSpeed = 7;
+   let jumpHeight = 15;
+   let cornerRadius = 10;
+   let fps = 60;
+   let frameCounter = 0;
+
+   if (height > width) {
+      obstacleWidth = 20;
+      birdPos = 30;
+      birdSize = 20;
+      obstacleSpeed = 3;
+      jumpHeight = 7;
+      cornerRadius = 5;
+   }
+
+   // Dark Mode Colors
+   if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      colors = ["rgb(0, 100, 200)", "rgba(0, 50, 100, 0.1)", "rgb(0, 140, 100)", "rgb(0, 220, 160)", "rgb(0, 255, 187)", "rgb(255, 255, 255)"];
+   }
+
+   function toggleSpeed() {
+      let el = document.getElementById("speedControlImage");
+      if (fps == 60) {
+         fps = Infinity;
+         el.src = "lightning.png";
+      } else {
+         fps = 60;
+         el.src = "snail.png";
+      }
+   }
+
+   class Bird {
+      constructor() {
+         this.y = height / 2;
+         this.speed = 0;
+         this.brain = new NeuralNetwork([5, 5, 5, 5, 2]);
+      }
+      draw(i) {
+         if (i == 0) {
+            ctx.fillStyle = colors[0];
+            fillRoundedRect(birdPos, this.y, birdSize, birdSize, cornerRadius);
+         } else {
+            ctx.fillStyle = colors[1];
+            ctx.fillRect(birdPos, this.y, birdSize, birdSize);
+         }
+      }
+   }
+
+   class Obstacle {
+      constructor() {
+         this.x = width;
+         this.slitHeight = Math.round(Math.random() * 200) + 200;
+         this.slitPosition = 20 + Math.round(Math.random() * (height - this.slitHeight - 40));
+      }
+      draw(isActive) {
+         ctx.fillStyle = colors[2];
+         if (isActive) ctx.fillStyle = colors[3];
+         fillRoundedRect(this.x, 0, obstacleWidth, this.slitPosition, cornerRadius);
+         fillRoundedRect(this.x, this.slitPosition + this.slitHeight, obstacleWidth, height - this.slitPosition - this.slitHeight, cornerRadius);
+      }
+   }
+
+   function fillRoundedRect(x, y, w, h, r) {
+      ctx.fillRect(x + r, y, w - 2 * r, h);
+      ctx.fillRect(x, y + r, r, h - 2 * r);
+      ctx.fillRect(x + w - r, y + r, r, h - 2 * r);
+      ctx.beginPath();
+      ctx.arc(x + r, y + r, r, 0, 2 * Math.PI);
+      ctx.arc(x + w - r, y + r, r, 0, 2 * Math.PI);
+      ctx.arc(x + r, y + h - r, r, 0, 2 * Math.PI);
+      ctx.arc(x + w - r, y + h - r, r, 0, 2 * Math.PI);
+      ctx.fill();
+   }
+
+   function beginTraining() {
+      let dc = document.getElementById("disclaimerContainer");
+      dc.style.transform = "scale(0.8)";
+      dc.style.opacity = "0";
+      setTimeout(() => {
+         dc.style.display = "none";
+      }, 400);
+      for (let i = 0; i < generationSize; i++) {
+         birds.push(new Bird());
+      }
+      restart();
+      loop();
+   }
+
+   function restart() {
+      obstacles = [];
+      let obstacle = new Obstacle();
+      obstacle.x = width / 2 - obstacleWidth / 2;
+      obstacles.push(obstacle);
+      obstacles.push(new Obstacle());
+
+      distanceFlown = 0;
+      generationCounter++;
+      document.getElementById("generationCounter").innerHTML = "Gen " + generationCounter;
+      document.getElementById("aliveCounter").innerHTML = generationSize + " alive";
+   }
+
+   function loop() {
+      frameCounter++;
+      distanceFlown++;
+      let updateFrame = false;
+      if (fps == 60 || frameCounter % 4 == 0) {
+         updateFrame = true;
+         ctx.clearRect(0, 0, width, height);
+      }
+      if (distanceFlown % 10 == 0) {
+         let dist = Math.round(distanceFlown / 10);
+         document.getElementById("scoreCounter").innerHTML = dist + " m";
+         if (dist > maxDistanceFlown) {
+            maxDistanceFlown = dist;
+            document.getElementById("maxScore").style.opacity = "0";
+            document.getElementById("scoreCounter").style.color = colors[4];
+         } else {
+            document.getElementById("maxScore").innerHTML = maxDistanceFlown + " m";
+            document.getElementById("maxScore").style.opacity = "1";
+            document.getElementById("scoreCounter").style.color = colors[5];
+         }
+      }
+
+      let activeObstacleIndex = 0;
+      if (obstacles[0].x + obstacleWidth < birdPos || (obstacles[1].x < obstacles[0].x && obstacles[1].x + obstacleWidth > birdPos)) {
+         activeObstacleIndex = 1;
+      }
+
+      for (let i = 0; i < birds.length; i++) {
+         let bird = birds[i];
+         bird.y += bird.speed;
+         bird.speed += 1;
+         if (updateFrame) bird.draw(i);
+
+         let netInputs = [];
+         netInputs.push(bird.y / height);
+         netInputs.push(bird.speed / 20);
+         netInputs.push(obstacles[activeObstacleIndex].x / (width / 2));
+         netInputs.push(obstacles[activeObstacleIndex].slitPosition / (height - 420));
+         netInputs.push(obstacles[activeObstacleIndex].slitHeight / 400);
+         let prediction = bird.brain.predict(netInputs);
+         if (prediction[0] > prediction[1]) {
+            bird.speed = -jumpHeight;
+         }
+
+         // Collisions
+         for (let j = 0; j < obstacles.length; j++) {
+            let obstacle = obstacles[j];
+            if (birdPos < obstacle.x + obstacleWidth && birdPos + birdSize > obstacle.x) {
+               if (bird.y < obstacle.slitPosition || bird.y + birdSize > obstacle.slitPosition + obstacle.slitHeight) {
+                  birds.splice(i, 1);
+                  i -= 1;
+
+                  let aliveCount = birds.length;
+                  document.getElementById("aliveCounter").innerHTML = aliveCount + " alive";
+                  if (aliveCount == 1) {
+                     bestBird = [...birds[0].brain.weights];
+                  }
+                  if (aliveCount == 0) {
+                     while (birds.length < generationSize) {
+                        let bird = new Bird();
+                        bird.brain.weights = [...bestBird];
+                        if (birds.length != 0) bird.brain.mutate(0.03, 0.016);
+                        birds.push(bird);
+                     }
+                     restart();
+                  }
+               }
+            }
+         }
+      }
+
+      // Update, Draw and Respawn Obstacles
+      for (let i = 0; i < obstacles.length; i++) {
+         let obstacle = obstacles[i];
+         obstacle.x -= obstacleSpeed;
+         if (obstacle.x < -obstacleWidth) obstacles[i] = new Obstacle();
+         if (updateFrame) obstacle.draw(i == activeObstacleIndex);
+      }
+
+      setTimeout(() => {
+         loop();
+      }, 1000 / fps);
+   }
+</script>

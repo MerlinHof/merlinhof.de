@@ -1,0 +1,232 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Liquid Simulation</title>
+  <meta name="description" content="A simulation of hundreds of little balls, which together behave just like a liquid."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/liquid/">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <canvas id="myCanvas" class="canvas">Your browser does not support the canvas element.</canvas>
+  <div id="splashContainer">
+    <t style="margin-bottom: 50px;">Chrome Desktop may be too slow to handle this simulation. Use Safari or Firefox for a better experience.</t>
+    <button onclick="start();" class="button" id="startbutton">START</button>
+  </div>
+</body>
+
+
+<script>
+// Prepare Canvas
+var canvas = document.getElementById("myCanvas");
+var height = canvas.clientHeight;
+var width = canvas.clientWidth;
+var ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+canvas.setAttribute('height', style_height * pixelFactor);
+canvas.setAttribute('width', style_width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+ctx.lineWidth = 2;
+
+// Variables
+let particles = [];
+let particleCount = 500;
+let particleRadius = 10;
+
+class Particle {
+  constructor(x, y) {
+    this.pos = {x: x, y: y};
+    this.speed = {x: 0, y: 0};
+    this.rotationEnergy = 0;
+    this.collision = false;
+    this.id = 0;
+    this.active = true;
+  }
+  draw() {
+    ctx.fillStyle = '#0000ff';
+    if (this.collision) ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(this.pos.x, this.pos.y, particleRadius, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
+function start() {
+  document.getElementById('splashContainer').style.display = 'none';
+  for (let i = 0; i < particleCount; i++) {
+    let p = new Particle(Math.round(Math.random()*width), Math.round(Math.random()*height));
+    p.speed.x = 3-Math.random()*6;
+    p.speed.y = 3-Math.random()*6;
+    p.id = i;
+    particles.push(p);
+
+    // TEST
+    // if (i == 0) {
+    //   let p = new Particle(400, 200);
+    //   p.speed = {x: 20, y: 0};
+    //   particles.push(p);
+    // } else {
+    //   let p = new Particle(width-400, 150);
+    //   p.speed = {x: -20, y: 0};
+    //   particles.push(p);
+    // }
+
+  }
+
+  for (let i = 0; i < particleCount; i++) {
+    particles[i].draw();
+  }
+
+  setInterval(() => { simulate(); }, 1000/60);
+}
+
+function simulate() {
+  ctx.clearRect(0, 0, width, height);
+  for (let i = 0; i < particleCount; i++) {
+    let p = particles[i];
+    p.collision = false;
+
+    // let speed = p.speed.x*p.speed.x + p.speed.y*p.speed.y;
+    // if (speed < 0.2) p.active = false;
+    // if (speed > 0.4) p.active = true;
+
+    if (p.active) {
+      p.pos.x += p.speed.x;
+      p.pos.y += p.speed.y;
+      p.speed.y += 0.2;
+    }
+
+    if (p.pos.y < particleRadius) {
+      p.pos.y = particleRadius;
+      p.speed.y *= -1;
+    }
+    if (p.pos.y > height - particleRadius) {
+      p.pos.y = height - particleRadius;
+      p.speed.y *= -1;
+    }
+    if (p.pos.x < particleRadius) {
+      p.pos.x = particleRadius;
+      p.speed.x *= -1;
+    }
+    if (p.pos.x > width - particleRadius) {
+      p.pos.x = width - particleRadius;
+      p.speed.x *= -1;
+    }
+
+    // Friction
+    p.speed.x *= 0.997;
+    p.speed.y *= 0.997;
+  }
+
+  // Collision Detection
+  let possibleCollisions = [];
+  let ind = 0;
+  particles.sort((a, b) => {
+    if (a.pos.x < b.pos.x) return -1;
+    if (a.pos.x > b.pos.x) return 1;
+    return 0;
+  });
+  let base = particles[0];
+  let prev = base;
+
+  for (let i = 1; i < particleCount; i++) {
+    let p = particles[i];
+    if (intervalsIntersect(base.pos.x-particleRadius, base.pos.x+particleRadius, p.pos.x-particleRadius, p.pos.x+particleRadius) || intervalsIntersect(prev.pos.x-particleRadius, prev.pos.x+particleRadius, p.pos.x-particleRadius, p.pos.x+particleRadius)) {
+      if (possibleCollisions[ind] == undefined) possibleCollisions[ind] = [];
+      possibleCollisions[ind][0] = base;
+      possibleCollisions[ind].push(p);
+      prev = p;
+    } else {
+      if (possibleCollisions[ind] != undefined) ind++;
+      base = p;
+      prev = base;
+    }
+  }
+
+  // Check for REAL collisions
+  for (let i = 0; i < possibleCollisions.length; i++) {
+    for (let j = 0; j < possibleCollisions[i].length; j++) {
+      for (let k = 0; k < possibleCollisions[i].length; k++) {
+        if (j != k) {
+          let dx = possibleCollisions[i][j].pos.x - possibleCollisions[i][k].pos.x;
+          let dy = possibleCollisions[i][j].pos.y - possibleCollisions[i][k].pos.y;
+          if (dx*dx+dy*dy <= Math.pow(2*particleRadius, 2)) {
+            possibleCollisions[i][j].collision = true;
+            possibleCollisions[i][k].collision = true;
+            collisionResponse(possibleCollisions[i][j], possibleCollisions[i][k]);
+          }
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < particleCount; i++) {
+    particles[i].draw();
+  }
+}
+
+function intervalsIntersect(x1, x2, y1, y2) {
+  return x1 <= y2 && y1 <= x2;
+}
+
+function collisionResponse(p1, p2) {
+
+  // Move Circles out of each other
+  let dx = p1.pos.x - p2.pos.x;
+  let dy = p1.pos.y - p2.pos.y;
+  let dist = Math.sqrt(dx*dx + dy*dy);
+  let overlap = particleRadius - 0.5*dist;
+  p1.pos.x += overlap * dx/dist + 1;
+  p1.pos.y += overlap * dy/dist + 1;
+  p2.pos.x -= overlap * dx/dist + 1;
+  p2.pos.y -= overlap * dy/dist + 1;
+
+  // Dynamic Collision Response
+  dx = p1.pos.x - p2.pos.x;
+  dy = p1.pos.y - p2.pos.y;
+  dist = Math.sqrt(dx*dx + dy*dy);
+  let normalUnit = {x: dx/dist, y: dy/dist};
+  let tangentUnit = {x: -normalUnit.y, y: normalUnit.x};
+  let normalScalar1 = dotProduct(normalUnit, p1.speed);
+  let tangentScalar1 = dotProduct(tangentUnit, p1.speed);
+  let normalScalar2 = dotProduct(normalUnit, p2.speed);
+  let tangentScalar2 = dotProduct(tangentUnit, p2.speed);
+
+  let newNormal1 = normalScalar2;
+  let newNormal2 = normalScalar1;
+  let newTangent1 = tangentScalar1;
+  let newTangent2 = tangentScalar2;
+
+  let normal1 = {x: newNormal1 * normalUnit.x, y: newNormal1 * normalUnit.y};
+  let tangent1 = {x: newTangent1 * tangentUnit.x, y: newTangent1 * tangentUnit.y};
+  let normal2 = {x: newNormal2 * normalUnit.x, y: newNormal2 * normalUnit.y};
+  let tangent2 = {x: newTangent2 * tangentUnit.x, y: newTangent2 * tangentUnit.y};
+
+  p1.speed = {x: normal1.x + tangent1.x, y: normal1.y + tangent1.y};
+  p2.speed = {x: normal2.x + tangent2.x, y: normal2.y + tangent2.y};
+}
+
+function dotProduct(v1, v2) {
+  return v1.x*v2.x + v1.y*v2.y;
+}
+
+// function sin2(x) {
+//   return 0.5 * (Math.sin((x*Math.PI)-(Math.PI/2))+1)
+// }
+
+// document.body.addEventListener("mousemove", (event) => {
+//   particles.sort((a, b) => {
+//     if (a.id < b.id) return -1;
+//     if (a.id > b.id) return 1;
+//     return 0;
+//   });
+//   particles[0].speed = {x: 0, y: 0};
+//   particles[0].pos = {x: event.clientX, y: event.clientY};
+// });
+
+</script>
+
+</html>

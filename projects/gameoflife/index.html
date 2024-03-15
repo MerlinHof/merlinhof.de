@@ -1,0 +1,34 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Conway's Game of Life</title>
+      <meta name="description" content="The famous Game of Life from John Conway. Just three simple rules decide whether a cell should live or die." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/gameoflife/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas">Your browser does not support this website.</canvas>
+      <div onclick="start();" class="button" id="startbutton">START</div>
+   </body>
+
+   <script>
+      // Prepare Canvas
+      let canvas = document.getElementById("canvas");
+      let height = canvas.clientHeight;
+      let width = canvas.clientWidth;
+      let ctx = canvas.getContext("2d");
+      let pixelFactor = window.devicePixelRatio;
+      canvas.setAttribute("height", height * pixelFactor);
+      canvas.setAttribute("width", width * pixelFactor);
+      ctx.scale(pixelFactor, pixelFactor);
+      ctx.lineCap = "round";
+
+      function random(max) {
+         return Math.floor(Math.random() * Math.floor(max));
+      }
+   </script>
+   <script src="main.js"></script>
+</html>

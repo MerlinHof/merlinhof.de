@@ -1,0 +1,70 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Traffic Simulation</title>
+  <meta name="description" content="A simulation of phantom traffic jams"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/traffic/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <canvas id="canvas">Your browser does not support this website.</canvas>
+  <div onclick="start();" class="button" id="startbutton">START</div>
+</body>
+
+<script src="util.js"></script>
+<script>
+
+// Prepare Canvas
+let canvas = document.getElementById('canvas');
+let height = canvas.clientHeight;
+let width = canvas.clientWidth;
+let ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+canvas.setAttribute('height', height * pixelFactor);
+canvas.setAttribute('width', width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+ctx.lineCap = 'round';
+
+// Global Variables
+let roadWidth = 50;
+
+function start() {
+  document.getElementById('startbutton').style.transform = 'scale(0)';
+  drawRoads();
+
+  let cars = [];
+  for (let i = 0; i < 100; i++) {
+    let car = new Car();
+    cars.push(car);
+    car.draw(ctx, width, height, roadWidth, 0.7);
+  }
+}
+
+function drawRoads() {
+  ctx.fillStyle = "rgb(0, 20, 10)";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "rgb(20, 30, 40)";
+  for (let i = 0; i < height/roadWidth; i++) {
+    ctx.fillStyle = "rgb(20, 30, 40)";
+    let y = i*roadWidth + 0.15*roadWidth;
+    let h = 0.7*roadWidth;
+    ctx.fillRect(0, y, width, h);
+    ctx.fillStyle = "rgb(40, 50, 70)";
+    ctx.fillRect(0, y-2, width, 2);
+    ctx.fillRect(0, y+h, width, 2);
+
+    ctx.fillStyle = "rgb(60, 70, 90)";
+    for (let j = 0; j < width / 30; j++) {
+      ctx.fillRect(30*j-10, y + h/3 - 1, 18, 2);
+      ctx.fillRect(30*j, y + 2*h/3 - 1, 18, 2);
+    }
+
+  }
+}
+
+</script>
+
+</html>

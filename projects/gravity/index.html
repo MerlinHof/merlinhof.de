@@ -1,0 +1,144 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Gravity Simulation</title>
+  <meta name="description" content="A beautiful simulation of the behaviour of several heavy particles attracting each other gravitationally."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/gravity/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+  <div onclick="start();" class="button" id="startbutton">START</div>
+  <audio id="audioplayer" loop>
+    <source src="utopia.mp3" type="audio/mp3">
+  </audio>
+  <!-- <img class="wallpaper" src="wallpaper.jpg"> -->
+</body>
+
+
+
+
+
+<script>
+// Prepare Canvas
+let canvas = document.getElementById('canvas');
+let height = canvas.clientHeight;
+let width = canvas.clientWidth;
+let ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+canvas.setAttribute('height', height * pixelFactor);
+canvas.setAttribute('width', width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+ctx.lineCap = "round";
+
+// Variables
+let particleCount = 5;
+let particles = [];
+let tailLength = 100;
+let mousePosition = {x: 0, y: 0};
+let cnt = 0;
+
+// Particle Class
+class Particle {
+  constructor() {
+    this.x = Math.random(1)*width;
+    this.y = Math.random(1)*height;
+    this.prevX = this.x;
+    this.prevY = this.y;
+    this.xspeed = 1-(Math.random(1)*2);
+    this.yspeed = 1-(Math.random(1)*2);
+    this.tail = [];
+  }
+}
+
+// Start the simulation
+function start() {
+  document.getElementById("audioplayer").play();
+  document.getElementById("startbutton").style.transform = "scale(0.0, 0.0)";
+  for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+  setInterval(loop, 1000/60);
+}
+
+// Simulate
+function loop() {
+  for (let i = 0; i < particleCount; i++) {
+    let obj = particles[i];
+    obj.prevX = obj.x;
+    obj.prevY = obj.y;
+    if (i == 0) {
+      obj.x = width/2;
+      obj.y = height/2;
+    } else {
+      obj.xspeed *= 0.997;
+      obj.yspeed *= 0.997;
+      obj.x += obj.xspeed;
+      obj.y += obj.yspeed;
+      if (obj.x < -200) {
+        obj.x = -200;
+        obj.xspeed *= -1;
+      }
+      if (obj.x > width+200) {
+        obj.x = width+200;
+        obj.xspeed *= -1;
+      }
+      if (obj.y < -200) {
+        obj.y = -200;
+        obj.yspeed *= -1;
+      }
+      if (obj.y > height+200) {
+        obj.y = height+200;
+        obj.yspeed *= -1;
+      }
+    }
+
+
+    let effectiveX = 0.0;
+    let effectiveY = 0.0;
+    for (let j = 0; j < particleCount; j++) {
+      if (j != i) {
+        let xdist = obj.x-particles[j].x;
+        let ydist = obj.y-particles[j].y;
+        let dist = xdist*xdist + ydist*ydist;
+        let xForce = xdist/dist;
+        let yForce = ydist/dist;
+        if (j == 0) {
+          xForce *= 0.2;
+          yForce *= 0.2;
+        }
+        effectiveX += xForce;
+        effectiveY += yForce;
+      }
+    }
+    obj.xspeed -= (effectiveX/0.1);
+    obj.yspeed -= (effectiveY/0.1);
+  }
+
+  // Update Screen
+  cnt++;
+  if (cnt % 2 == 0) {
+    cnt = 0;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.fillRect(0, 0, width, height);
+  }
+  for (let i = 1; i < particleCount; i++) {
+    let colorR = ((i+76)*29)%256;
+    let colorG = ((i+739)*58)%256;
+    let colorB = ((i+93)*374)%256;
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = `rgb(${colorR}, ${colorG}, ${colorB})`;
+    ctx.beginPath();
+    ctx.moveTo(particles[i].prevX, particles[i].prevY);
+    ctx.lineTo(particles[i].x, particles[i].y);
+    ctx.stroke();
+  }
+}
+
+
+</script>
+
+</html>

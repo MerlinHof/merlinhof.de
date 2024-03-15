@@ -1,0 +1,79 @@
+<html>
+
+<head>
+   <meta charset="utf-8" />
+   <title>3D World</title>
+   <meta name="description" content="..." />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <base href="/projects/3d_world/">
+   <link rel="stylesheet" href="/styles/shared.css?v=18">
+   <link rel="stylesheet" href="index.css?v=18">
+   <script defer src="graphicsEngine.js"></script>
+   <script defer src="gameEngine.js"></script>
+   <script defer src="inventory.js"></script>
+   <script defer src="wireframeOdyssey.js"></script>
+   <script defer src="scenes/scene0.js"></script>
+</head>
+
+<body>
+   <div id="splashContainer">
+      <t class="title" id="splashTitle">Wireframe Odyssey</t>
+      <div onclick="start();" class="button" id="startbutton">START</div>
+   </div>
+
+   <div id="canvasContainer"></div>
+   <div id="centerPointer"></div>
+
+   <div id="messageContainer">
+      <img id="messageIcon" src="src/star.png">
+      <t id="messageText"></t>
+   </div>
+
+   <div id="inventoryContainer"></div>
+
+   </div>
+</body>
+
+
+<script>
+
+
+   function start() {
+      document.getElementById("splashContainer").style.backgroundColor = "rgba(20, 40, 80, 0)";
+      document.getElementById("splashContainer").style.opacity = "0";
+      // (new Audio("src/music.mp3")).play();
+      startGame();
+   }
+
+
+
+   let messageHideTimeout0 = setTimeout(() => { }, 0);
+   let messageHideTimeout1 = setTimeout(() => { }, 0);
+   function showMessage(msg, icon) {
+      clearTimeout(messageHideTimeout0);
+      clearTimeout(messageHideTimeout1);
+      document.getElementById("messageContainer").style.display = "flex";
+      document.getElementById("messageText").innerText = msg;
+      if (icon == undefined) {
+         document.getElementById("messageIcon").src = "src/star.png";
+      } else {
+         document.getElementById("messageIcon").src = "src/" + icon;
+      }
+      setTimeout(() => {
+         document.getElementById("messageContainer").style.opacity = "1";
+         document.getElementById("messageContainer").style.transform = "scale(1)";
+         document.getElementById("messageContainer").style.filter = "blur(0px)";
+         messageHideTimeout0 = setTimeout(() => {
+            document.getElementById("messageContainer").style.opacity = "0";
+            document.getElementById("messageContainer").style.transform = "scale(0.7)";
+            document.getElementById("messageContainer").style.filter = "blur(10px)";
+            messageHideTimeout1 = setTimeout(() => {
+               document.getElementById("messageContainer").style.display = "none";
+            }, 700);
+         }, 3000);
+      }, 0);
+   }
+
+</script>
+
+</html>

@@ -1,0 +1,140 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Covid Probs</title>
+  <meta name="description" content=""/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/covidrisc/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+
+  <t class="title">Corona-Risiko</t><br>
+  <!-- <t class="text">Gib dein Alter und deinen Impfstatus an und lass auf dieser Basis deine persönlichen Wahrscheinlichkeiten für eine Infektion, eine Hospitalisierung,
+    eine Hospitalisierung mit aktiver Beatmung und die Todeswahrscheinlichkeit bestimmen.</t><br><br><br>-->
+  <t class="text">Bezogen auf die nächsten 90 Tage</t>
+  <br><div class="button" id="vaxxinatedButton" onclick="toggleVaxxinated()">GEIMPFTE</div><br>
+  <div id="ageListContainer"></div>
+
+  <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+
+  <script src="data.js"></script>
+  <script src="graph.js"></script>
+  <script>
+  // Prepare Canvas
+  let canvas = document.getElementById("canvas");
+  let height = canvas.clientHeight;
+  let width = canvas.clientWidth;
+  let ctx = canvas.getContext("2d");
+  let pixelFactor = window.devicePixelRatio;
+  canvas.setAttribute('height', height * pixelFactor);
+  canvas.setAttribute('width', width * pixelFactor);
+  ctx.scale(pixelFactor, pixelFactor);
+
+  // Global Variables
+  let vaxxinated = true;
+  updateList();
+  //main();
+
+  function main() {
+    //let smoothGraph = Graph.smoothenBarGraph(intenseCareAge, 5, true, ctx);
+    //console.log(smoothGraph[65]);
+  }
+
+
+
+
+
+  function updateList() {
+    document.getElementById('ageListContainer').innerHTML = "";
+    let sum = 0;
+    for (let age = 5; age < 100; age++) {
+      let population = getPopulation(age);
+      let vaxxRate = getVaxxRate(age)/100;
+      let incidence = getIncidence(age);
+      //console.log(age + ": " + population);
+
+      // Deaths
+      //let weeklyDeaths = getWeeklyDeaths(age);
+      //let vaxxedProportion = vaxxRate * getVaxxBreakthroughDeaths(age)/100;
+      //console.log(age + ": " + vaxxedProportion*100);
+
+      // Hospitalization
+      let newITS = getNewITS(age);
+
+      if (vaxxinated) {
+        incidence *= (incidenceVaxxed/totalIncidence);
+        //weeklyDeaths *= vaxxedProportion;
+      } else {
+        incidence *= (incidenceUnvaxxed/totalIncidence);
+        //weeklyDeaths *= (1-vaxxedProportion);
+      }
+
+      let absoluteInfectionsPerDay = (population/100000*incidence)/7;
+      let percentageOfPopulation = absoluteInfectionsPerDay/population;
+      let infectionRisc = 90*percentageOfPopulation; // 90 Days
+      //console.log("Daily infections of " + age + " year olds: " + Math.floor(absoluteInfectionsPerDay) + " (" + 100*percentageOfPopulation + "%)");
+      //let deathRisc = 12*(weeklyDeaths/population); // 12 Weeks
+
+      let infectionRiscDisplay = Math.floor(1000*infectionRisc)/10;
+      let hospitalizationRiscDisplay = 0;
+      let deathRiscDisplay = 0; //Math.floor(1000*deathRisc)/10;
+
+      let icon = "oldman";
+      if (age <= 80) icon = "oldcouple";
+      if (age <= 60) icon = "olderman";
+      if (age <= 45) icon = "couple";
+      if (age <= 32) icon = "man2";
+      if (age <= 26) icon = "man";
+      if (age <= 18) icon = "teenage";
+      if (age <= 11) icon = "child";
+      if (age <= 2) icon = "baby";
+
+      let element = `
+      <div class="elementContainer">
+        <img src="sources/` + icon + `.png" class="elementAgeIcon">
+        <t class="elementAgeText">` + age + `-Jährige</t><br>
+        <div class="elementInfoContainer">
+          <img src="sources/virus.png" class="elementInfoIcon">
+          <t class="elementInfoText">` + infectionRiscDisplay + ` %</t>
+        </div>
+        <div class="progressBarContainer"><div class="progressBar" style="margin-left: -` + (100-infectionRiscDisplay) + `%"></div></div>
+        <div class="elementInfoContainer">
+          <img src="sources/hospital.png" class="elementInfoIcon">
+          <t class="elementInfoText">` + hospitalizationRiscDisplay + ` %</t>
+        </div>
+        <div class="progressBarContainer"><div class="progressBar" style="margin-left: -` + (100-hospitalizationRiscDisplay) + `%"></div></div>
+        <!-- <div class="elementInfoContainer">
+          <img src="sources/grave.png" class="elementInfoIcon">
+          <t class="elementInfoText">` + deathRiscDisplay + ` %</t>
+        </div>
+        <div class="progressBarContainer"><div class="progressBar" style="margin-left: -` + (100-deathRiscDisplay) + `%"></div></div>
+        -->
+      </div><br>`;
+      document.getElementById('ageListContainer').innerHTML += element;
+    }
+    //console.log("Total new Infections per Day: " + Math.floor(sum));
+  }
+
+
+  function toggleVaxxinated() {
+    let button = document.getElementById("vaxxinatedButton");
+    if (vaxxinated) {
+      vaxxinated = false;
+      button.innerHTML = "UNGEIMPFTE";
+      updateList();
+    } else {
+      vaxxinated = true;
+      button.innerHTML = "GEIMPFTE";
+      updateList();
+    }
+  }
+
+
+  </script>
+
+</body>
+
+</html>

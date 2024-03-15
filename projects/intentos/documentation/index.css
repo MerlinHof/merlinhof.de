@@ -1,0 +1,179 @@
+@font-face {
+    font-family: 'norm';
+    src: url("font.ttf") format("truetype");
+    font-weight: bolder;
+}
+
+@font-face {
+    font-family: 'code';
+    src: url("code.ttf") format("truetype");
+    font-weight: 0;
+    font-style: normal;
+}
+
+*{
+    font-family: norm;
+  }
+
+body {
+    background-color: #ffffff;
+    margin: 0 !important;
+    padding-bottom: 200px;
+    padding-left: 240px;
+    padding-right: 240px;
+}
+
+
+#titl1 {
+  user-select: none;
+  display: block;
+  font-weight: bold;
+  font-size: 40px;
+  margin-top: 120px;
+  color: #000000;
+}
+#titl2 {
+  user-select: none;
+  display: block;
+  font-weight: bold;
+  font-size: 40px;
+  margin-top: 10px;
+  margin-bottom: 80px;
+
+  color: #bbbbbb;
+}
+
+.section {
+  display: block;
+  font-weight: bold;
+  font-size: 25px;
+  margin-top: 50px;
+  color: #000000;
+}
+
+.text {
+  display: block;
+  font-weight: normal;
+  font-size: 20px;
+  margin-top: 10px;
+  color: #000000;
+  line-height: 25px;
+}
+
+.text str {
+  display: inline;
+  color: #00cca0;
+  font-weight: bolder;
+}
+
+.text key {
+  display: inline;
+  color: #ff00ff;
+  font-weight: bolder;
+}
+
+.code, cmt, str, key, fnc, par {
+  font-family: code;
+  font-weight: normal;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.codeframe {
+  display: block;
+  background-color: #2a3141;
+  padding: 10px;
+  width: auto;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.code cmt {
+  display: inline;
+  color: #707080;
+}
+
+.code str {
+  display: inline;
+  color: #00eea5;
+}
+
+.code key {
+  display: inline;
+  color: #ff00ff;
+}
+
+.code fnc {
+  display: inline;
+  color: #2196f3;
+}
+
+.code par {
+  display: inline;
+  color: #ffbb00;
+}
+
+
+
+
+
+
+
+.selimg {
+  display: block;
+  float: left;
+  width: 30px;
+  height: 30px;
+  margin-right: 15px;
+  object-fit: contain;
+}
+
+.seltext {
+  user-select: none;
+  display: block;
+  font-weight: bold;
+  font-size: 25px;
+  transition:all 0.2s ease;
+  color: #000000;
+}
+
+.sel {
+  box-sizing: border-box;
+  display: block;
+  width: 270px;
+  padding: 15px;
+  transition:all 0.2s ease;
+  background-color: #eceff1;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.sel:hover {
+  transition:all 0.2s ease;
+  background-color: #2a3141;
+}
+
+.sel:hover .seltext{
+  transition:all 0.2s ease;
+  color: white
+}
+
+
+
+
+
+@media screen and (max-width: 800px) {
+  body {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  #titl1 {
+    margin-top: 20px;
+  }
+  #titl2 {
+    margin-bottom: 50px;
+  }
+  .sel {
+    width: 100%;
+  }
+}

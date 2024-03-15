@@ -1,0 +1,33 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/paths/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body style="overflow: visible">
+      <t class="title" id="title">How it works</t><br /><br />
+      <t class="text">
+         This program leverages an advanced algorithm to identify the most efficient route connecting a series of points. Imagine you're a courier tasked with making deliveries to various cities; this
+         software is designed to calculate the most direct path through all designated cities.
+         <br /><br />
+         Attempting every conceivable route, measuring their lengths, and selecting the shortest may seem straightforward. However, this method proves prohibitively costly and inefficient in
+         application. For merely 15 points, the permutations skyrocket to 14! (87.2 billion) possible routes. Even at a rate of evaluating a million routes per second, it would necessitate nearly 24
+         hours to pinpoint the shortest route. An increase to 20 points would extend the process to 4000 years, and adding another five cities would push this duration to almost 20 billion years.
+         While feasible for ten or fewer points, this approach is impractical for larger sets.
+         <br /><br />
+         The algorithm this program employs is vastly more efficient. It can deduce the shortest path among 100 points in mere seconds—a feat far removed from computing times that surpass the number
+         of atoms in the universe. Initially, it generates a random "generation" of 700 paths. Each is assessed, the optimum is preserved, and the rest are discarded. Subsequently, a new set of 700
+         paths is derived by slightly altering the "base path" through random mutations. This cycle of mutation—selecting random start and end points and inverting their sequence—repeats, ensuring the
+         length of the optimal path discovered is consistently equal to or shorter than its predecessor, thereby progressively nearing the optimal solution.
+         <br /><br />
+         Moreover, the aforementioned process is executed multiple times per cycle independently, fostering a variety of solutions to the same problem and enhancing the overall quality of the outcome.
+         This algorithm significantly outpaces the exhaustive search method. Although it reliably identifies one of the shortest possible paths swiftly, absolute certainty of having found the shortest
+         path remains elusive. Nevertheless, the substantial gains in efficiency render this minor uncertainty acceptable in the majority of scenarios. </t
+      ><br /><br />
+      <div class="button" onclick="window.history.back();">BACK</div>
+      <br /><br /><br />
+   </body>
+</html>

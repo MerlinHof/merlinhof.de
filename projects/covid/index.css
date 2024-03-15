@@ -1,0 +1,72 @@
+.title {
+  font-family: bold;
+  font-size: 40px;
+  display: inline-block;
+}
+
+.subtitle {
+  opacity: 0.3;
+  font-size: 24px;
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#graphContainer {
+  width: calc(100% - 80px);
+  max-width: 90vh;
+  height: calc(100% - 340px);
+  border-radius: 20px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  float: left;
+}
+
+.dot {
+  float: left;
+  margin-top: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+}
+
+#reddot {
+  background-color: rgb(233, 81, 94);
+}
+
+#greendot {
+  background-color: rgb(77, 210, 120);
+}
+
+#bluedot {
+  background-color: rgb(77, 140, 180);
+}
+
+.text {
+  font-size: 24px;
+  display: block;
+  margin-left: 40px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+#upperinfo {
+  margin-top: 40px;
+}
+#lowerinfo {
+  margin-top: 10px;
+}
+
+/* Mobile mode */
+@media only screen and (max-width:640px) {
+  #graphContainer {
+    width: calc(100% - 10px);
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}

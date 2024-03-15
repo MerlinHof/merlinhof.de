@@ -1,0 +1,27 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/stockai/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+    <t class="title">How it works</t><br><br>
+    <t class="text">
+      This program uses a neural network to predict future data based on existing information. In this case, the program is specifically designed to predict future closing prices of bitcoin based on historical data. The neural network is trained using this historical data in order to improve its predictions.
+      <br><br>
+      The program uses a genetic algorithm to train the neural network. This algorithm creates a generation of 300 randomly initialized neural networks and calculates the fitness of each one based on its ability to accurately predict the closing prices of the next five days given the previous 14 days. The best network is selected and duplicated, and the next generation is filled with 300 copies of this network. Each network is then mutated slightly and the process repeats. Over time, this process leads to the neural networks becoming increasingly accurate at predicting the closing prices.
+      <br><br>
+      To ensure that the neural network can output values in the same range as the input data, the program uses a modified sigmoid function as its activation function. This function is a mathematical formula that maps the input values to output values in a specific range. In this case, the sigmoid function is modified to output values between -2 and +2, which is the range of the scaled and normalized input data.
+      <br><br>
+      In some cases, the prediction made by the neural network may approach a horizontal line. This indicates that the network has become stuck in a local minimum and is unable to improve its predictions. In this situation, the network needs to be re-trained in order to escape the local minimum and improve its accuracy. This can be achieved by starting the training process again from scratch, or by using a different training algorithm that is better suited to escaping local minima.
+      <br><br>
+      Overall, this program demonstrates how a neural network can be trained to predict future data based on existing information. By using a genetic algorithm and a modified sigmoid function, the program is able to train the network to make accurate predictions of the closing prices of bitcoin.
+    </t><br><br>
+    <div class="button" type="button" id="startButton" onclick="window.history.back();">BACK</div>
+    <br><br><br>
+</body>
+
+</html>

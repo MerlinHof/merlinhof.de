@@ -1,0 +1,169 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>3D Gravity Simulation</title>
+  <meta name="description" content="A three-dimensional simulation of a particle orbiting around a heavy object."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/gravity3d/">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <canvas id="myCanvas" class="canvas">
+      Your browser does not support the canvas element.
+  </canvas>
+  <button onclick="start();" class="button" id="startbutton">START</button>
+</body>
+</html>
+
+<script>
+// Prepare Canvas
+var canvas = document.getElementById("myCanvas");
+var height = canvas.clientHeight;
+var width = canvas.clientWidth;
+var ctx = canvas.getContext("2d");
+ctx.clearRect(0, 0, width, height);
+ctx.fillStyle = "#404040";
+ctx.lineWidth = 5;
+let pixelFactor = window.devicePixelRatio;
+let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+canvas.setAttribute('height', style_height * pixelFactor);
+canvas.setAttribute('width', style_width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+
+// Variables
+let tailLength = 50;
+let depth = width;
+let speed = {x:  Math.random()*1, y: Math.random()*1, z:  Math.random()*1};
+let pos = {x: Math.random()*width, y: Math.random()*height, z: Math.random()*depth};
+let tail = [];
+let starPos = {x: width/2, y: height/2, z: depth/2};
+let mass = 0.01;
+
+// Start the simulation
+function start() {
+  document.getElementById("startbutton").style.transform = "scale(0.0, 0.0)";
+  ctx.lineCap = 'round';
+
+  // Simulation
+  setInterval(sim, 16.66666666);
+}
+
+function sim() {
+  //speed.x *= 0.999;
+  //speed.y *= 0.999;
+  //speed.z *= 0.999;
+  pos.x += speed.x;
+  pos.y += speed.y;
+  pos.z += speed.z;
+
+  let dx = pos.x-starPos.x;
+  let dy = pos.y-starPos.y;
+  let dz = pos.z-starPos.z;
+  let dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2));
+
+  let ax = -(dx/(dist*dist))/mass;
+  let ay = -(dy/(dist*dist))/mass;
+  let az = -(dz/(dist*dist))/mass;
+
+  speed.x += ax;
+  speed.y += ay;
+  speed.z += az;
+
+  // Tail
+  tail.splice(0, 0, {x: pos.x, y: pos.y, z: pos.z});
+  if (tail.length > tailLength) {
+    tail.pop();
+  }
+
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw Particle
+  let prevX = tail[0].x;
+  let prevY = tail[0].y;
+  let inFront = [];
+  for (let i = 1; i < tail.length-1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(prevX, prevY);
+    prevX = tail[i].x;
+    prevY = tail[i].y
+    ctx.lineTo(tail[i].x, tail[i].y);
+    let lw = 2*(tail[i].z/100);
+    if (lw >= 3) {
+      ctx.lineWidth = lw;
+    } else {
+      ctx.lineWidth = 3;
+    }
+
+    let val = Math.floor(255*(tail[i].z/depth));
+    ctx.strokeStyle = 'rgb(' + val + ', ' + val + ', ' + val + ')';
+    if (tail[i].z < depth/2) {
+     ctx.strokeStyle = 'rgb(' + val*0.4 + ', ' + val*0.6 + ', ' + val + ')';
+    }
+
+    //let distToStar = Math.sqrt(Math.pow(starPos.x-tail[i].x, 2) + Math.pow(starPos.y-tail[i].y, 2));
+    if (tail[i].z > depth/2) {
+      inFront.push({index: i, width: lw, color: 'rgb(' + val + ', ' + val + ', ' + val + ')'});
+    } else {
+      ctx.stroke();
+    }
+  }
+
+  // Draw Grid
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(20, 30, 50, 0.6)';
+  for (let x = 0; x < width; x += 30) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += 30) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  // Draw star
+  var gradient = ctx.createRadialGradient(starPos.x,starPos.y,0,starPos.x,starPos.y,20);
+  gradient.addColorStop(0, 'rgba(255, 244, 123, 1.0)');
+  gradient.addColorStop(1, 'rgba(154, 114, 0, 1.0)');
+  ctx.fillStyle = gradient;
+  //ctx.fillStyle = 'rgb(204, 164, 43)';
+  ctx.beginPath();
+  ctx.arc(width/2, height/2, 20, 0, 2 * Math.PI);
+  ctx.fill();
+
+
+  // Draw Particle path in front
+  if (inFront.length > 0) {
+    prevX = tail[inFront[0].index-1].x;
+    prevY = tail[inFront[0].index-1].y;
+    for (let i = 0; i < inFront.length; i++) {
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      let currX, currY;
+      if (i != inFront.length) {
+        currX = tail[inFront[i].index].x;
+        currY = tail[inFront[i].index].y;
+      } else {
+        currX = tail[inFront[i-1].index+1].x;
+        currY = tail[inFront[i-1].index+1].y;
+      }
+      if (Math.sqrt(Math.pow(prevX-currX, 2) + Math.pow(prevY-currY, 2)) < 100) {
+        ctx.lineTo(currX, currY);
+        ctx.lineWidth = inFront[i].width;
+        ctx.strokeStyle = inFront[i].color;
+        ctx.stroke();
+      }
+
+      prevX = currX;
+      prevY = currY;
+    }
+  }
+}
+
+    </script>

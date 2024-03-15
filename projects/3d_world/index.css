@@ -1,0 +1,82 @@
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(20, 40, 80);
+}
+
+#splashContainer {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: rgba(20, 40, 80, 1.0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: 1s;
+}
+#splashTitle {
+  color: white;
+}
+
+#canvasContainer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 1;
+}
+
+#centerPointer {
+  width: 16px;
+  height: 16px;
+  background-color: rgb(200, 230, 255, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: absolute;
+  z-index: 1;
+  border-radius: 100px;
+  transition: 0.3s;
+}
+
+#messageContainer {
+  z-index: 5;
+  background-color: rgb(255, 255, 255);
+  padding: 20px;
+  padding-left: 35px;
+  padding-right: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50px;
+  border-radius: 100px;
+  opacity: 0;
+  transform: scale(0.7);
+  filter: blur(10px);
+  transition: 0.7s;
+  display: none;
+}
+
+#messageIcon {
+  width: 25px;
+  height: 25px;
+  margin-right: 20px;
+}
+
+#messageText {
+  color: rgb(0, 0, 0);
+  font-family: boldest;
+}
+
+
+#inventoryContainer {
+  z-index: 5;
+  position: absolute;
+  bottom: 30px;
+}

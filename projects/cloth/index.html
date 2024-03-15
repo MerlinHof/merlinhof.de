@@ -1,0 +1,285 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Cloth Simulation</title>
+      <meta name="description" content="Simulation of an elastic cloth or net hanging from the top. You can cut it with your mouse or finger." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/cloth/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+      <div id="splashContainer">...</div>
+   </body>
+
+   <script>
+      // Prepare Canvas
+      let canvas = document.getElementById("canvas");
+      let height = canvas.clientHeight;
+      let width = canvas.clientWidth;
+      let ctx = canvas.getContext("2d");
+      let pixelFactor = window.devicePixelRatio;
+      canvas.setAttribute("height", height * pixelFactor);
+      canvas.setAttribute("width", width * pixelFactor);
+      ctx.scale(pixelFactor, pixelFactor);
+      ctx.lineCap = "round";
+
+      // Global Variables
+      let config = {
+         knotSpacing: 6,
+         hCount: 56,
+         vCount: 25,
+         stiffness: 0.3,
+         snapForce: 12,
+      };
+      let position = { x: 0, y: 0 };
+      let knots = [];
+      let springs = [];
+      let mouseDown = false;
+      let mousePath = [];
+      let maxMousePathLength = 8;
+      let isDarkmode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTimeout(() => {
+         start();
+      }, 1000);
+
+      // Class for Knot
+      class Knot {
+         constructor(x, y, isFixed) {
+            this.pos = { x: x, y: y };
+            this.speed = { x: 0, y: 0 };
+            this.isFixed = isFixed;
+         }
+
+         draw() {
+            if (this.isFixed) {
+               ctx.fillStyle = "rgb(195, 30, 180)";
+               if (isDarkmode) ctx.fillStyle = "rgb(205, 40, 100)";
+               ctx.beginPath();
+               ctx.arc(this.pos.x, this.pos.y, 7, 0, 2 * Math.PI);
+               ctx.fill();
+            }
+         }
+      }
+
+      // Class for the Springs between the Knots
+      class Spring {
+         constructor(a, b) {
+            this.endPoints = { a: a, b: b };
+            this.totalForce;
+         }
+
+         calculateForce() {
+            let dx = this.endPoints.a.pos.x - this.endPoints.b.pos.x;
+            let dy = this.endPoints.a.pos.y - this.endPoints.b.pos.y;
+            let springLength = Math.sqrt(dx * dx + dy * dy);
+            this.totalForce = config.stiffness * (springLength - config.knotSpacing);
+            let angle = Math.PI / 2; // 90°
+            if (dx != 0) angle = Math.atan(Math.abs(dy / dx));
+            let fx = this.totalForce * Math.cos(angle);
+            let fy = this.totalForce * Math.sin(angle);
+            return {
+               x: fx,
+               y: fy,
+               total: this.totalForce,
+            };
+         }
+
+         draw() {
+            ctx.strokeStyle = "rgb(" + 250 * this.totalForce + ", 80, 240)";
+            if (isDarkmode) ctx.strokeStyle = "rgb(" + 255 * this.totalForce + ", 80, 240)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(this.endPoints.a.pos.x, this.endPoints.a.pos.y);
+            ctx.lineTo(this.endPoints.b.pos.x, this.endPoints.b.pos.y);
+            ctx.stroke();
+         }
+      }
+
+      // Starts the Simulation
+      function start() {
+         document.getElementById("splashContainer").style.display = "none";
+
+         // Calculate Position / Size / Orientation / ... based on screen size
+         if (width < height) {
+            config.hCount = 45;
+            config.vCount = 25;
+         }
+         let clothWidth = Math.min(width - 80, 850);
+         config.knotSpacing = clothWidth / (config.hCount - 1);
+         let clothHeight = config.knotSpacing * config.vCount;
+         if (clothHeight > height - 200) {
+            config.knotSpacing = (height - 0.5 * height) / (config.vCount - 1);
+            clothWidth = config.knotSpacing * config.hCount;
+         }
+         position.x = width / 2 - clothWidth / 2;
+         position.y = 40;
+
+         // Create Knots
+         for (let y = 0; y < config.vCount; y++) {
+            for (let x = 0; x < config.hCount; x++) {
+               let fixed = false;
+               if (y == 0 && x % 11 == 0) fixed = true;
+               let k = new Knot(position.x + x * config.knotSpacing, position.y + y * config.knotSpacing, fixed);
+               knots.push(k);
+            }
+         }
+
+         // Create Springs
+         for (let i = 0; i < knots.length; i++) {
+            if ((i + 1) % config.hCount != 0) {
+               let spring_h = new Spring(knots[i], knots[i + 1]);
+               springs.push(spring_h);
+            }
+            if (i < config.hCount * (config.vCount - 1)) {
+               let spring_v = new Spring(knots[i], knots[i + config.hCount]);
+               springs.push(spring_v);
+            }
+         }
+
+         // Start Simulation Loop (update two times per frame for smaller steps and higher accuracy)
+         setInterval(() => {
+            updateCloth();
+            updateCloth();
+            updateScreen();
+         }, 1000 / 60);
+      }
+
+      // Simulation Loop itself
+      function updateCloth() {
+         // Gravitationally Accelerate Knots
+         for (let i = 0; i < knots.length; i++) {
+            let k = knots[i];
+            if (!k.isFixed) {
+               k.pos.x += k.speed.x;
+               k.pos.y += k.speed.y;
+               k.speed.y += 0.085;
+
+               // Friction
+               k.speed.x *= 0.99;
+               k.speed.y *= 0.99;
+
+               // Bottom
+               if (k.pos.y > height) {
+                  k.pos.y = height;
+                  k.speed.y *= -0.2;
+               }
+            }
+         }
+
+         // Update Springs to apply Forces to Knots
+         for (let i = 0; i < springs.length; i++) {
+            let s = springs[i];
+            let force = s.calculateForce();
+            if (force.total > config.snapForce) {
+               if (!s.endPoints.a.isFixed && !s.endPoints.b.isFixed) {
+                  springs.splice(i, 1);
+               }
+            }
+            if (s.endPoints.a.pos.x < s.endPoints.b.pos.x) {
+               s.endPoints.a.speed.x += force.x;
+               s.endPoints.b.speed.x -= force.x;
+            } else {
+               s.endPoints.a.speed.x -= force.x;
+               s.endPoints.b.speed.x += force.x;
+            }
+            if (s.endPoints.a.pos.y < s.endPoints.b.pos.y) {
+               s.endPoints.a.speed.y += force.y;
+               s.endPoints.b.speed.y -= force.y;
+            } else {
+               s.endPoints.a.speed.y -= force.y;
+               s.endPoints.b.speed.y += force.y;
+            }
+         }
+      }
+
+      // Draws everything to screen
+      function updateScreen() {
+         ctx.clearRect(0, 0, width, height);
+         for (let i = 0; i < springs.length; i++) springs[i].draw();
+         for (let i = 0; i < knots.length; i++) knots[i].draw();
+
+         // Draw Mouse Path
+         if (mousePath.length > 0) {
+            if (!mouseDown) {
+               mousePath.splice(0, 1);
+            }
+            if (mousePath.length > 1) {
+               ctx.strokeStyle = "rgb(100, 100, 255)";
+               ctx.lineWidth = 5;
+               ctx.beginPath();
+               ctx.moveTo(mousePath[0].x, mousePath[0].y);
+               for (let i = 1; i < mousePath.length - 1; i++) {
+                  let x = mousePath[i].x;
+                  let y = mousePath[i].y;
+                  let xc = (x + mousePath[i + 1].x) / 2;
+                  let yc = (y + mousePath[i + 1].y) / 2;
+                  ctx.quadraticCurveTo(x, y, xc, yc);
+               }
+               ctx.stroke();
+            }
+         }
+      }
+
+      // Mouse / Touch Events
+      document.body.addEventListener("mousedown", (event) => {
+         mouseDown = true;
+      });
+      document.body.addEventListener("mouseup", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("mousemove", (event) => {
+         inputMoved(event);
+      });
+
+      document.body.addEventListener("touchstart", (event) => {
+         mouseDown = true;
+      });
+      document.body.addEventListener("touchend", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("touchcancel", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("touchmove", (event) => {
+         inputMoved(event);
+      });
+
+      function inputMoved(event) {
+         let position = {};
+         if (event.type == "touchmove") {
+            var evt = typeof event.originalEvent === "undefined" ? event : event.originalEvent;
+            var touch = evt.touches[0] || evt.changedTouches[0];
+            position = { x: touch.pageX, y: touch.pageY };
+         } else if (event.type == "mousedown" || event.type == "mousemove") {
+            position = { x: event.clientX, y: event.clientY };
+         }
+
+         if (mouseDown) {
+            mousePath.push(position);
+            if (mousePath.length > maxMousePathLength) {
+               mousePath.splice(0, 1);
+            }
+
+            // Collision detection
+            if (mousePath.length >= 4) {
+               let a = mousePath[mousePath.length - 4];
+               let b = position;
+
+               for (let i = 0; i < springs.length; i++) {
+                  let c = springs[i].endPoints.a.pos;
+                  let d = springs[i].endPoints.b.pos;
+
+                  // Checks if Line Segments ab and cd are intersecting: Algorithm by Bryce Boe (https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/)
+                  function ccw(a, b, c) {
+                     return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
+                  }
+                  if (ccw(a, c, d) != ccw(b, c, d) && ccw(a, b, c) != ccw(a, b, d)) springs.splice(i, 1);
+               }
+            }
+         }
+      }
+   </script>
+</html>

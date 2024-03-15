@@ -1,0 +1,42 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Symmetric Encryption Demo</title>
+  <meta name="description" content="A demonstration of a simple symmetric encryption. Everything in less than 100 lines of code."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/encryption/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+  <script src="security.js"></script>
+</head>
+
+<body>
+  <t class="title">Symmetric Encryption</t><br><br>
+  <textarea class="foreground textarea" id="text" rows="15" cols="80" placeholder="Text" autofocus></textarea>
+  <input type="text" class="foreground textarea" id="key" spellcheck="false" placeholder="Key"/><br>
+  <div class="button" type="button" id="encryptButton" onclick="encryptInput();">ENCRYPT</div>
+  <div class="button" type="button" id="decryptButton" onclick="decryptInput();">DECRYPT</div>
+  <br><t id="outputTitle"></t>
+  <br><div id="outputContainer"><t id="output"></t></div>
+
+</body>
+
+</html>
+
+
+<script>
+  function encryptInput() {
+    let text = document.getElementById("text").value;
+    let password = document.getElementById("key").value;
+    let output = encrypt(text, password);
+    document.getElementById("outputTitle").innerHTML = "Encrypted Text";
+    document.getElementById("output").innerHTML = output;
+  }
+  function decryptInput() {
+    let text = document.getElementById("text").value;
+    let password = document.getElementById("key").value;
+    let output = decrypt(text, password);
+    document.getElementById("outputTitle").innerHTML = "Decrypted Text";
+    document.getElementById("output").innerHTML = output;
+  }
+</script>

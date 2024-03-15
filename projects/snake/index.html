@@ -1,0 +1,143 @@
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Snake Classic</title>
+  <meta name="description" content="The classic snake game. Keyboard and touch controls."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/snake/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <div onclick="restart();" id="reload" class="reload">
+    <img src="refresh.png" class="reloadimg">
+  </div>
+  <div class="scoreholder" id="scoreholder">
+    <a class="score" id="score">0</a>
+  </div>
+</body>
+</html>
+
+
+<script src="snake.js"></script>
+<script>
+// Prepare Canvas
+let canvas = document.getElementById('canvas');
+let height = canvas.clientHeight;
+let width = canvas.clientWidth;
+let ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+canvas.setAttribute('height', height * pixelFactor);
+canvas.setAttribute('width', width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+ctx.lineCap = 'round';
+let snakeColor = '#ffffff';
+
+// Color style matching device theme
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+  snakeColor = '#000000';
+}
+
+// Variables
+let fingerdown = false;
+let lastx, lasty, touchx, touchy;
+
+// Create Snake
+let snake = new Snake(width, height);
+
+// Update and draw Snake
+setInterval(() => {
+  snake.update();
+
+  // Draw
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#ff0000";
+  if (!snake.dead) {
+    ctx.fillRect(snake.foodPos.x*gridsize, snake.foodPos.y*gridsize, gridsize-1, gridsize-1);
+    ctx.fillStyle = snakeColor;
+  }
+  for (let i = 0; i < snake.tail.length; i++) {
+    ctx.fillRect(snake.tail[i].x*gridsize, snake.tail[i].y*gridsize, gridsize-1, gridsize-1);
+  }
+
+  if (snake.dead) {
+    document.getElementById("scoreholder").style.display = "block";
+    document.getElementById("score").innerHTML = "Score: " + (snake.length - 3);
+    document.getElementById("reload").style.display = "block";
+  }
+}, 100);
+
+
+function restart() {
+  snake.reset();
+  document.getElementById("scoreholder").style.display = 'none';
+  document.getElementById("score").innerHTML = '';
+  document.getElementById("reload").style.display = 'none';
+}
+
+
+
+
+
+
+
+
+
+
+// Key Pressed events
+document.onkeydown = function(evt) {
+  evt = evt || window.event;
+  switch (evt.keyCode) {
+    case 37:
+    case 65:
+      snake.control(directions.left);
+      break;
+    case 38:
+    case 87:
+      snake.control(directions.up);
+      break;
+    case 39:
+    case 68:
+      snake.control(directions.right);
+      break;
+    case 40:
+    case 83:
+      snake.control(directions.down);
+      break;
+  }
+};
+
+
+
+// Touch controls
+document.body.addEventListener('touchstart', function(e) {
+  fingerdown = true;
+  lastx = e.touches[0].clientX;
+  lasty = e.touches[0].clientY;
+}, false);
+
+document.body.addEventListener('touchmove', function(e) {
+  touchx = e.touches[0].clientX;
+  touchy = e.touches[0].clientY;
+  if ((touchx < lastx) && (Math.abs(touchx - lastx) > Math.abs(touchy - lasty))) {
+    snake.control(directions.left);
+  }
+  if ((touchy < lasty) && (Math.abs(touchy - lasty) > Math.abs(touchx - lastx))) {
+    snake.control(directions.up);
+  }
+  if ((touchx > lastx) && (Math.abs(touchx - lastx) > Math.abs(touchy - lasty))) {
+    snake.control(directions.right);
+  }
+  if ((touchy > lasty) && (Math.abs(touchy - lasty) > Math.abs(touchx - lastx))) {
+    snake.control(directions.down);
+  }
+}, true);
+
+document.body.addEventListener('touchend', function(e) {
+  fingerdown = false;
+}, false);
+
+</script>

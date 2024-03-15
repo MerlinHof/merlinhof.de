@@ -1,0 +1,82 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Fractal Tree</title>
+      <meta name="description" content="The famous tree fractal with a convenient slider to adjust the angle of the individual branches." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/tree/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas"></canvas>
+      <br /><t class="title">Fractal Tree</t><br />
+      <br /><input type="range" class="foreground slider" min="0" max="1000" value="50" oninput="update(this.value)" />
+   </body>
+</html>
+
+<script>
+   // Prepare Canvas
+   let canvas = document.getElementById("canvas");
+   let height = canvas.clientHeight;
+   let width = canvas.clientWidth;
+   let ctx = canvas.getContext("2d");
+   let pixelFactor = window.devicePixelRatio;
+   canvas.setAttribute("height", height * pixelFactor);
+   canvas.setAttribute("width", width * pixelFactor);
+   ctx.scale(pixelFactor, pixelFactor);
+   ctx.lineCap = "round";
+
+   // Setup
+   let branchAngle;
+   update(50);
+
+   // Updates tree
+   function update(val) {
+      branchAngle = (val / 1000) * 2 * Math.PI;
+      ctx.clearRect(0, 0, width, height);
+
+      // Defines initial branch length based on screen size
+      let initialBranchLength;
+      width < height ? (initialBranchLength = width / 8) : (initialBranchLength = height / 8);
+
+      // Draw Trunk
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--trunkColor");
+      ctx.lineWidth = 3 + (initialBranchLength * initialBranchLength) / 800;
+      drawLine(width / 2, height / 4 + height / 2 + 50, width / 2, height / 4 + height / 2);
+
+      // Starts drawing tree
+      branch(width / 2, height / 4 + height / 2, initialBranchLength, Math.PI / 2);
+   }
+
+   // Recursive function to draw tree
+   function branch(x, y, len, baseAngle) {
+      // Left and Right Branches
+      for (let i = 0; i < 2; i++) {
+         updateStrokeStyle(len);
+         let relativeBranchAngle = i == 0 ? baseAngle + branchAngle : baseAngle - branchAngle;
+         let dx = Math.cos(relativeBranchAngle) * len;
+         let dy = Math.sin(relativeBranchAngle) * len;
+         drawLine(x, y, x + dx, y - dy);
+         if (len > 5) branch(x + dx, y - dy, len * 0.75, relativeBranchAngle);
+      }
+   }
+
+   // Updates color and line width based on branch length
+   function updateStrokeStyle(len) {
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--trunkColor");
+      if (len < 20) ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--leafColor");
+      let newLineWidth = Math.ceil((len * len) / 800);
+      if (newLineWidth < 2) newLineWidth = 2;
+      ctx.lineWidth = newLineWidth;
+   }
+
+   // Draws a line in the Canvas
+   function drawLine(sx, sy, ex, ey) {
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+   }
+</script>

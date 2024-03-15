@@ -1,0 +1,73 @@
+[
+  {
+    "title": "Simple and Concise",
+    "description": "CleanCode provides a very compact, yet intuitive and understandable syntax design, which makes it increadibly easy to understand code at a glance. There are four main data types in CleanCode which include Numbers, Booleans, Objects and Undefined.",
+    "code": "# Variables <br> var name = \"Merlin\" <br> var age = 19 <br> var height = 1.78m <br> var isAlive = true <br><br> # Constants <br> const PI = 3.14159265358 <br> const E = 2.71828182846"
+  },
+
+  {
+    "title": "Cleaner without Braces",
+    "description": "There are no braces in CleanCode to determine the belonging of a block of code. CleanCode uses small indentations of two spaces to determine to which scope a line of code belongs. That makes the Code shorter, easier to read and faster to write. To make it easier to read deeply nested blocks of code, the optional keyword end can be used.",
+    "code": "if (isAlive & height < 1.8) <br>  print(\"Gotcha\") <br>  isAlive = false <br><br> for (var i = 0, i < 20, i++) <br>  print(\"This is round [i+1] of 20\") <br>  if (2*i-4 > 13) break <br>"
+  },
+
+  {
+    "title": "Straight to the Point",
+    "description": "No boilerplate and no ridiculous stringing together of unnecessarily long keywords results in a concise code, which does exactly what you want it to do. Functions are more powerful than ever thanks to the possibility to make arguments either optional or mandatory using an \"!\".",
+    "code": "# Define a concise yet powerful function <br> sum(tuple!, func) <br>  var sum = 0 <br>  for (var elem in tuple) <br>    sum += if (func == undefined) elem else func(elem) <br>  return sum <br>end <br><br> # Use the function <br> var elems = (1, 2, ..., 10) <br> var result = sum(elems) <br> print(\"Sum of 1 to 10 is [result]\") <br><br> result = sum(1...100, (i) 1/i) <br> print(\"Partial Harmonic Sum of 100 is [result]\")"
+  },
+
+  {
+    "title": "Tuples are the new Arrays",
+    "description": "To replace the old Arrays with Tuples does not only make much more sense from a syntactical standpoint, but they also make the code more coherent and open a whole new world of endless mathematical possibilities never seen before.",
+    "code": "# Define a simple Tuple <br> var names = (\"Angela\", \"Robert\", \"Annalena\") <br> var mixed = (\"Hello\", 12, object, 7.2) <br> var nested = (6, (1, 4), (1, (2, 3), 4)) <br><br> # Intelligent Initialization <br> var numbers, range <br> numbers = (21, 54) <br> numbers = numbers.fill(0, 5)  # (21, 54, 0, 0, 0) <br> numbers = (1, 2, ..., 5)      # (1, 2, 3, 4, 5) <br> numbers = (6, 8, ..., 14)     # (6, 8, 10, 12, 14) <br> numbers = (0, ..., 5)         # (0, 0, 0, 0, 0) <br> range   = 0...5               # (0, 1, 2, 3, 4) <br><br> # Tuple Methods <br> tuple.append(7) <br> tuple.prepend(1) <br> tuple.insert(3, 7) <br> tuple.removeValue(1) <br> tuple.removeIndex(0) <br> tuple.removeAll(7) <br> tuple.fill(8, 5) <br> tuple.slice(0, 3) <br> tuple.copy() <br> tuple.clear() <br> tuple.concat(tuple) <br> tuple.forEvery(func)  <br> tuple.map(func) <br> tuple.reduce(func) <br> tuple.filter(func) <br> tuple.sort(func) <br> tuple.count(8) <br> tuple.contains(2) <br> tuple.reverse() <br> tuple.replace(12, 3, 1) <br> tuple.swap(0, 1) <br> tuple.indexOf(12, offset) <br> tuple.set(2, 7) <br> tuple.get(1) <br> tuple.get(3).set(5, 7) <br> tuple.get(3).get(4)<br> var s = tuple.size"
+  },
+
+  {
+    "title": "Tuple Arithmetic",
+    "description": "Calculations are simpler and more intuitive than ever.",
+    "code": "var numbers = (1, 2, 3) + 1      # (2, 3, 4) <br> var numbers = 10 - (1, 2, 3)     # (9, 8, 7) <br> var numbers = (1, 2, 3) * 3      # (3, 6, 9) <br> var numbers = (2, 4, 6) / 2      # (1, 2, 3) <br> var numbers = (1, 2) + (4, 5)    # (5, 7) <br> var numbers = (1, 2, 3) * (4, 5) # (4, 10, 3)"
+  },
+
+  {
+    "title": "Powerful Pattern Matching",
+    "description": "In CleanCode condition checking is very simple yet extremely powerful thanks to the advanced pattern matching techniques.",
+    "code": "(1, 2, 3) == (1, 2, 3) <br> (1, 2, 3) != (1, 2, 4) <br> ((1), 2)  == (1, 2) <br> (1, 2, 3) < (2, 3, 4)  # pair-wise comparison <br> (7, 8, 9) > (6, 9, 5)  # Uncomparable -> Always false <br> (1, 2)    < (4, 5, 6) <br> (5, 5, 3) != (5, ...) <br> (8, 8, 8) == (8, ...) <br><br> # A single star (*) represents every possible thing, even nothing, the sequence 5, 6, 7 or the tuple (7, 42), whereas two stars (**) represent one and only one element. <br> (1, 2, 3) == (1, *, 3) <br> (1, 2, 3) == (1, **, 3) <br> (1, 2, 3) == (*, 3) <br> (1, 2, 3) != (*, 5) <br> (1, 2, 3) == (*, 1, *) <br> (1, 2, 3) != (**, 1, **) <br> (1, 2, 3) == (*) <br> (1, 2, 3) != (**) <br> (1, 2)    == (**, **) <br> (*, *)    == (*) <br> (**, **)  != (**)"
+  },
+
+  {
+    "title": "Sorted and Default Parameters",
+    "description": "You can either sort parameters before using them or set default values directly in the function head. That reduces lots of long, repeating and hard to understand blocks of code.",
+    "code": "random(a < b) <br>  print(\"a is smaller than b\") <br>  return <br><br> setName(name, update = true) <br>  if (update) print(\"Yeah [name]!\") <br>  return"
+  },
+
+  {
+    "title": "Custom Number Suffixes",
+    "description": "To make scientific applications and increase the redability of your code, CleanCode provides the option to define and use custom number suffixes. Thanks to the increased intuitivity the likelyhood of mistakes and errors is greatly reduced.",
+    "code": "# Usage <br> var thousand = 1k <br> var onePointTwoMillion = 1.2M <br> var veryBigInt = 2b <br> var time = 80ms <br> var time = 12s <br> var size = 80% <br> var twentyKilometers = 20km <br> if (12s == 12000ms) <br><br> # Define own Number Suffixes <br> DEFINESUFFIX g 9.81       # (m/s^2) <br> DEFINESUFFIX G 1000000000 # Giga <br> DEFINESUFFIX s 1000       # Second <br> DEFINESUFFIX cm 0.01      # Centimeter <br> DEFINESUFFIX m 1          # Meter <br> DEFINESUFFIX km 1000      # Kilometer <br> DEFINESUFFIX ° 0.017453   # Degrees to radians"
+  },
+
+  {
+    "title": "Intuitive Threading",
+    "description": "Using multiple threads has been a pain forever. CleanCode gives you the opportunity to make multithreading great again by using very intuitive and compact methods of deeply integrated and highly abstracted classes. Now you don't have to focus on the limitations of your language anymore, but instead focus on the goal you want to achieve.",
+    "code": "var id = 12 <br> var thread = new Thread(id) <br> thread.start(callbackHandler, (callback, id) <br>  intenseCalculation() <br>  callback(\"Done :D\") <br> ) <br><br> wait(thread)"
+  },
+
+  {
+    "title": "Object Oriented",
+    "description": "The usage of Objects in CleanCode is simplified and stream lined to make using objects more intuitive and more powerful than ever.",
+    "code": "class RainDrop<br>  var x, y, size, speed, circle<br>  init(x, y, size)<br>    this.x = x<br>    this.y = y<br>    this.size = size<br>    speed = size<br>    circle = new Circle(size)<br>    circle.color = Color.rgb(20, 170, 210)<br>  fall()<br>    this.y += this.speed<br>  draw()<br>    circle.draw(x, y)<br>  static createRandom()<br>    var x = random(0, width)<br>    var size = random(2, 5)<br>    return new RainDrop(x, 0, size)<br>end # Optional"
+  },
+
+  {
+    "title": "Multiple Inheritance",
+    "description": "To give you even more power, in CleanCode you are now able to inherit multiple existing classes.",
+    "code": "class Library extends Building, Store<br>  init(numberOfBooks, size)<br>    Building.init(size)<br>    Store.init()<br>    ...<br>end # Optional"
+  },
+
+  {
+    "title": "Powerful Integrated Modules",
+    "description": "CleanCode provides a powerful suite of integrated modules with a consistent, efficient and intuitive syntax.",
+    "code": "GUI<br>NeuralNetwork<br>DataBase<br>Color<br>Font<br>..."
+  }
+]

@@ -1,0 +1,64 @@
+body {
+  overflow: hidden;
+}
+
+:root {
+  --bestPathColor: rgba(10, 15, 30, 0.3);
+  --vertexColor: rgb(10, 15, 30);
+}
+
+#elementContainer {
+  position: absolute;
+  display: inline-block;
+  z-index: 1;
+}
+
+.title {
+  font-family: bold;
+  font-size: 40px;
+  display: inline-block;
+}
+
+.text {
+  font-size: 24px;
+  opacity: 1;
+  margin-top: 20px;
+  height: 40%;
+}
+
+#startButton {
+  float: left;
+  margin-right: 10px;
+}
+
+#infoButton {
+  background-image: none;
+  box-shadow: none;
+  background-color: rgba(0, 20, 50, 0.15);
+  color: #000000;
+}
+
+sup { vertical-align: top; font-size: 0.65em; }
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  left: 0%;
+  top: 0%;
+  z-index: 0;
+  position: absolute;
+}
+
+
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bestPathColor: rgba(200, 230, 255, 0.3);
+    --vertexColor: rgb(200, 230, 255);
+  }
+  #infoButton {
+    background-color: rgba(200, 220, 255, 0.1);
+    color: #ffffff;
+  }
+}

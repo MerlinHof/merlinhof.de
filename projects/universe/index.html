@@ -1,0 +1,116 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Universe Simulation</title>
+  <meta name="description" content="Evolves little AI creatures inside of a simulated environment."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/universe/">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+
+    <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+    <button onclick="main()" class="button" id="startbutton">START</button>
+
+    <script src="brain.js"></script>
+    <script src="universe.js"></script>
+    <script src="creature.js"></script>
+    <script>
+        // Prepare Canvas
+        let canvas = document.getElementById("canvas");
+        let height = canvas.clientHeight;
+        let width = canvas.clientWidth;
+        let ctx = canvas.getContext("2d");
+        let pixelFactor = window.devicePixelRatio;
+        canvas.setAttribute('height', height * pixelFactor);
+        canvas.setAttribute('width', width * pixelFactor);
+        ctx.scale(pixelFactor, pixelFactor);
+
+        // Global Variables
+        let universe;
+        let creatures = [];
+
+        function main() {
+          document.getElementById("startbutton").style.transform = "scale(0.0, 0.0)";
+          universe = new Universe(ctx);
+          universe.draw();
+
+          for (let i = 0; i < 500; i++) {
+            let x = 0;
+            let y = 0;
+            do {
+              x = Math.floor(Math.random()*width);
+              y = Math.floor(Math.random()*height);
+            } while (universe.getBlock(x, y) != universe.blocks.dirt);
+            let creature = new Creature(ctx, x, y);
+            creatures.push(creature);
+            creature.draw();
+          }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+        // Variables
+        // ...
+        let brain;
+
+        // Start the simulation
+        function start() {
+          document.getElementById("startbutton").style.transform = "scale(0.0, 0.0)";
+          //setInterval(sim, 1000/30);
+
+          let base = 13;
+          brain = new Brain(5, 3, base*base);
+          console.log(brain);
+
+          brain.draw(ctx, 0);
+          brain.update([0.224877834, 0.56967347, 0.949727835, 1.9854, -0.9338982]);
+          for (let i = 0; i < 10000; i++) {
+            if (i%200 == 0) {
+              let a = [];
+              for (let i = 0; i < 5; i++) {
+                a.push(2*Math.random()-1);
+              }
+              let res = brain.update(a);
+              //console.log(res[0]);
+            }
+            //brain.update();
+            //console.log(brain.activeNeurons.length);
+            console.log(brain.update()[0]);
+          }
+        }
+
+        // Simulation loop
+        function sim() {
+          // ...
+        }*/
+
+    </script>
+
+</body>
+
+</html>

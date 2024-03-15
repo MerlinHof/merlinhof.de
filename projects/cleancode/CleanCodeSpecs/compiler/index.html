@@ -1,0 +1,275 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>CleanScript Compiler</title>
+  <html lang="de">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <div id="textField" contenteditable="true"><pre>
+    let greet
+    let ind = 42
+    if (ind < 7) {
+      greet = "Hello"
+    } else {
+      greet = "Hi"
+      ind = 2*ind+1
+    }
+  </pre></div>
+
+</body>
+</html>
+
+
+<script>
+
+// Starts the compilation process
+function compile() {
+  let code = document.getElementById("textField").innerText;
+  // do other stuff
+  let tokens = tokenize(code);
+  let blockTree = createScopeBlockTree(tokens);
+  console.log(blockTree);
+  return createSyntaxTree(blockTree);
+}
+
+
+
+
+// Prepares the code and creates the tokens
+function tokenize(code) {
+  code = "{\n" + code + "\n}";
+  code = code.replaceAll("\n", " ; ");
+  let specialCharacters = "+ - * / % = == , < > ( ) { } !".split(" ");
+  for (let i = 0; i < specialCharacters.length; i++) {
+    let char = specialCharacters[i];
+    code = code.replaceAll(char, " " + char + " ");
+  }
+
+  while (code.includes("  ")) code = code.replaceAll("  ", " ");
+  let tokens = code.split(" ");
+  for (let i = 0; i < tokens.length; i++) {
+    tokens[i] = tokens[i].trim();
+    if (tokens[i].length == 0) {
+      tokens.splice(i, 1);
+      i--;
+    }
+  }
+  return tokens;
+}
+
+
+// Creates nested array representing the scope structure
+function createScopeBlockTree(tokens) {
+  if (tokens.length == 1) return clean(tokens[0]);
+  let startIndex = 0;
+  for (let i = 0; i < tokens.length; i++) {
+    let token = tokens[i];
+    if (token == "{") startIndex = i+1;
+    if (token == "}") {
+      let res = tokens.slice(startIndex, i);
+      tokens = tokens.slice(0, startIndex-1).concat(tokens.slice(i+1));
+      tokens.splice(startIndex-1, 0, clean(res));
+      return createScopeBlockTree(tokens);
+    }
+  }
+}
+
+// Removes Semikolons at the beginning and at the end
+function clean(tokens) {
+  if (tokens[0] == ";") tokens.splice(0, 1);
+  if (tokens[tokens.length-1] == ";") tokens.splice(tokens.length-1, 1);
+  return tokens;
+}
+
+
+
+// Creates the syntax tree
+function createSyntaxTree(tokens) {
+  return evaluateTokenList(tokens);
+}
+
+
+
+
+
+
+// Evaluates a single token
+function evaluateTokenList(tokens) {
+  let tokenIndex = 0;
+  let statements = [];
+
+  let its = 0;
+  while (tokenIndex < tokens.length && its < 1000) {
+    its++;
+    if (Array.isArray(tokens[tokenIndex])) {
+      statements.push(evaluateTokenList(tokens[tokenIndex]));
+      tokenIndex++;
+      continue;
+    }
+
+    // Variable declaration
+    // let x
+    // let x = 7
+    if (tokens[tokenIndex] == "let") {
+      let name = tokens[tokenIndex+1];
+      require(name.length > 0, "Variables need to have a name");
+      require(isValidName(name), "Invalid variable name");
+      if (tokens[tokenIndex+2] == "=") {
+        let value = [];
+        tokenIndex += 3;
+        while (tokens[tokenIndex] != ";" && tokenIndex < tokens.length) {
+          value.push(tokens[tokenIndex]);
+          tokenIndex++;
+        }
+        require(value.length > 0, "Invalid expression after variable assignment");
+        statements.push(new Declaration(name));
+        statements.push(new Assignment(name, new Expression(value)));
+        tokenIndex++;
+      } else {
+        statements.push(new Declaration(name));
+        tokenIndex += 3;
+      }
+      continue;
+    }
+
+    // Variable assignment
+    // x = 4
+    if (tokens[tokenIndex+1] == "=") {
+      let name = tokens[tokenIndex];
+      let value = [];
+      tokenIndex += 2;
+      while (tokens[tokenIndex] != ";" && tokenIndex < tokens.length) {
+        value.push(tokens[tokenIndex]);
+        tokenIndex++;
+      }
+      statements.push(new Assignment(name, new Expression(value)));
+      tokenIndex++;
+      continue;
+    }
+
+    // If statement
+    // if (a) b
+    if (tokens[tokenIndex] == "if" && tokens[tokenIndex+1] == "(") {
+      let res = findEndingBracket(tokens, tokenIndex+2, "(", ")");
+      let condition = res.result;
+      tokenIndex = res.offset;
+
+      let body;
+      let elseBody;
+      if (Array.isArray(tokens[tokenIndex])) {
+        body = evaluateTokenList(tokens[tokenIndex]);
+        if (tokens[tokenIndex+1] == "else") {
+          elseBody = evaluateTokenList(tokens[tokenIndex+2]);
+          tokenIndex += 3;
+        }
+      } else {
+        body = evaluateTokenList([tokens[tokenIndex]]);
+        tokenIndex++;
+      }
+      statements.push(new IfStatement(new Condition(condition), body, elseBody));
+      continue;
+    }
+
+    // more...
+
+
+    // End Condition
+    if (tokens[tokenIndex] == ";") {
+      tokenIndex++;
+      continue;
+    }
+    console.log("Unknown Symbol: " + tokens[tokenIndex]);
+    break;
+
+  }
+  return statements;
+}
+
+
+
+function findEndingBracket(tokens, tokenIndex, typeOpen, typeClosed) {
+  let insideCounter = 0;
+  let res = [];
+  while (true) {
+    if (tokens[tokenIndex] == typeOpen) insideCounter++;
+    if (tokens[tokenIndex] == typeClosed) insideCounter--;
+    if (tokens[tokenIndex] == typeClosed && insideCounter <= 0) break;
+    res.push(tokens[tokenIndex]);
+    tokenIndex++;
+  }
+  return {
+    offset: tokenIndex+1,
+    result: res
+  };
+}
+
+
+
+
+
+class Declaration {
+  constructor(name) {
+    this.description = "declaration";
+    this.name = name;
+    this.value = undefined;
+    this.type = undefined;
+  }
+}
+
+class Assignment {
+  constructor(name, value) {
+    this.description = "assignment";
+    this.name = name;
+    this.value = value;
+    this.type = undefined;
+  }
+}
+
+class Condition {
+  constructor(value) {
+    this.description = "condition";
+    this.value = value;
+  }
+}
+
+class Expression {
+  constructor(value) {
+    this.description = "expression";
+    this.value = value;
+  }
+}
+
+class IfStatement {
+  constructor(condition, body, elseBody) {
+    this.condition = condition;
+    this.body = body;
+    this.elseBody = elseBody;
+  }
+}
+
+
+
+//console.log(evaluateToken(tokenize(prepareCode("let peter = 3*i+4")), 0));
+/*let ggg = `if (3 < 7) {
+peter = 7
+}`;
+console.log(evaluateToken(tokenize(prepareCode(ggg)), 0));*/
+
+// Helper functions
+
+// Checks if passed string is a valid variable name
+function isValidName(name) {
+  if (name.substring(0, 1) == name.substring(0, 1).toUpperCase()) return false;
+  return true;
+}
+
+// Throws an error if assertion is not fulfilled
+function require(bool, msg, lineNumber) {
+  if (!bool) throw new Error("Compilation failed: " + msg + " (line " + lineNumber + ")");
+}
+
+
+</script>

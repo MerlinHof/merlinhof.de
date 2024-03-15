@@ -1,0 +1,9 @@
+#title {
+  margin-bottom: 0px;
+}
+
+#statusText {
+  margin-left: 0px;
+  margin-top: 0px;
+  overflow-wrap: break-word;
+}

@@ -1,0 +1,86 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Extended Euclidean Algorithm</title>
+  <meta name="description" content="The Extended Euclidean Algorithm - Visual Demo"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/eea/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <div class="container" id="containerA">
+    <t class="title">A</t>
+  </div>
+  <div class="vdiv"></div>
+  <div class="container" id="containerB">
+    <t class="title">B</t>
+  </div>
+  <div class="vdiv"></div>
+  <div class="container" id="containerK">
+    <t class="title">k</t>
+  </div>
+  <div class="vdiv"></div>
+  <div class="container" id="containerAlpha">
+    <t class="title">α</t>
+  </div>
+  <div class="vdiv"></div>
+  <div class="container" id="containerBeta">
+    <t class="title">β</t>
+  </div>
+</body>
+
+</html>
+
+<script>
+
+// Generate UI
+//console.log(eea(935, 1491));
+
+function eea(a, b) {
+  if (b < a) return false;
+  document.getElementById('containerA').innerHTML += `<t class="text">` + a + `</t>`;
+  document.getElementById('containerB').innerHTML += `<t class="text">` + b + `</t>`;
+
+  let k = [];
+  let cnt = 0;
+  while (a != 1) {
+    cnt++;
+    let newK = Math.floor(b/a);
+    let tmp = a;
+    a = b-newK*a;
+    b = tmp;
+    k.push(newK);
+
+    document.getElementById('containerA').innerHTML += `<t class="text">` + a + `</t>`;
+    document.getElementById('containerB').innerHTML += `<t class="text">` + b + `</t>`;
+    document.getElementById('containerK').innerHTML += `<t class="text">` + newK + `</t>`;
+    if (a == 1) {
+      document.getElementById('containerK').innerHTML += `<t class="text">--</t>`;
+    }
+    if (cnt > 1000) return false;
+  }
+
+  let alpha = 1;
+  let beta = 0;
+  let vals = [{a: 1, b: 0}];
+  for (let i = k.length-1; i >= 0; i--) {
+    let tmp = alpha;
+    alpha = alpha*(-k[i]) + beta;
+    beta = tmp;
+    vals.push({a: alpha, b: beta});
+  }
+
+  for (let i = vals.length-1; i >= 0; i--) {
+    document.getElementById('containerAlpha').innerHTML += `<t class="text">` + vals[i].a + `</t>`;
+    document.getElementById('containerBeta').innerHTML += `<t class="text">` + vals[i].b + `</t>`;
+  }
+
+  return {
+    alpha: alpha,
+    beta: beta
+  };
+}
+
+</script>

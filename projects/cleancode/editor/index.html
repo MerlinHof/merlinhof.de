@@ -1,0 +1,832 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>CleanCode Editor</title>
+  <meta name="description" content="Let's introduce CleanCode - the most advanced Programming Language of all time"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/cleancode/editor/">
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+
+  <!-- SideBar -->
+  <div id="sideBar">
+    <t class="title">CleanCode</t>
+    <div id="sideBarViewSelectorContainer">
+      <div style="margin-right: 2px" class="sideBarViewSelectorButton" onclick="showFileTreeView()" id="sideBarViewSelectorButtonFileTree">FILES</div>
+      <div style="margin-left: 2px" class="sideBarViewSelectorButton" onclick="showOptionsView()" id="sideBarViewSelectorButtonOptions">OPTIONS</div>
+    </div>
+    <div class="sideBarViewContainer" id="sideBarFileTreeContainer">
+      <div id="sideBarFileControlContainer">
+        <img class="iconButton" src="images/addfile.png" onclick="createNewFileUI()">
+        <img class="iconButton" src="images/addfolder.png" onclick="createNewFolderUI()">
+        <img class="iconButton" src="images/rename.png" onclick="renameFileUI()">
+        <img class="iconButton" src="images/delete.png" onclick="deleteFileUI()">
+      </div>
+      <div id="sideBarFileContainer"></div>
+    </div>
+    <div class="sideBarViewContainer" id="sideBarOptionsContainer">
+      <div id="optionsButtonContainer">
+        <img class="iconButton" src="images/import.png">
+        <img class="iconButton" src="images/export.png">
+        <img class="iconButton" src="images/settings.png">
+      </div>
+      <t id="sideBarOptionsSubTitle">COMPILER<br></t>
+      <div id="sideBarCompilerOptionContainer">
+        <div class="sideBarFile" onclick="showCompileDialog(0)">
+          <img class="sideBarFileIcon" src="images/safari.png">WebApp
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(1)">
+          <img class="sideBarFileIcon" src="images/apple.png">Xcode
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(2)">
+          <img class="sideBarFileIcon" src="images/windows.png">Windows
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(3)">
+          <img class="sideBarFileIcon" src="images/android.png">Android
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(4)">
+          <img class="sideBarFileIcon" src="images/linux.png">Linux
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(5)">
+          <img class="sideBarFileIcon" src="images/raspberry.png">Raspberry Pi
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(6)">
+          <img class="sideBarFileIcon" src="images/disc.png">Bootable OS
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(7)">
+          <img class="sideBarFileIcon" src="images/cpu.png">Microcontroller
+        </div>
+        <div class="sideBarFile" onclick="showCompileDialog(8)">
+          <img class="sideBarFileIcon" src="images/terminal.png">Terminal
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Editor -->
+  <div id="editorContainer" onscroll="syncScroll()">
+    <div id="lineNumberContainer"></div>
+    <div class="editor" id="editorOverlay"></div>
+    <textarea class="editor" id="editor" contenteditable="true" autocomplete="off" autocorrect="off" spellcheck="false" oninput="editorCodeChanged()"></textarea>
+  </div>
+
+  <!-- Dialog for naming / renaming files and folders -->
+  <div class="dialogContainer" id="nameFileDialogContainer">
+    <div class="dialog" id="nameFileDialog">
+      <div class="dialogTitleContainer">
+        <img class="dialogTitleImage" src="images/rename.png">
+        <t class="dialogTitle" id="nameFileDialogTitle">Rename</t>
+      </div>
+      <input type="text" id="dialogInput" placeholder="Enter Filename" value="myfile.cc" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="dialogButtonContainer">
+        <img class="dialogButton dialogSaveButton" src="images/save.png" onclick="dialogSaveButtonClicked()">
+        <img class="dialogButton dialogCancelButton" src="images/close.png" onclick="hideDialog()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog for deleting files and folders -->
+  <div class="dialogContainer" id="deleteFileDialogContainer">
+    <div class="dialog" id="deleteFileDialog">
+      <div class="dialogTitleContainer">
+        <t class="dialogTitle">Are you sure?</t>
+      </div>
+      <div class="dialogButtonContainer">
+        <img class="dialogButton dialogDeleteButton"  src="images/delete.png" onclick="dialogDeleteButtonClicked()">
+        <img class="dialogButton dialogCancelButton" src="images/close.png" onclick="hideDialog()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog for Compiler -->
+  <div class="dialogContainer" id="compileDialogContainer">
+    <div class="dialog" id="compileDialog">
+      <div class="dialogTitleContainer">
+        <img class="dialogTitleImage" id="compileDialogTitleImage">
+        <t class="dialogTitle" id="compileDialogTitle">Compiling to WebApp...</t>
+      </div>
+      <t id="compileDialogText"></t>
+      <div class="dialogButtonContainer">
+        <img class="dialogButton dialogSaveButton" id="compileDialogSaveButton" src="images/play.png" onclick="dialogSaveButtonClicked()">
+        <img class="dialogButton dialogCancelButton" src="images/close.png" onclick="hideDialog()">
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+<script src="/code/cleancode/highlighting.js"></script>
+<script src="compiler/interface.js"></script>
+<script src="compiler/clyteCode.js"></script>
+<script src="compiler/compileToTerminal.js"></script>
+<script defer>
+
+// Elements and other global variables
+let lineNumberContainer = document.getElementById("lineNumberContainer");
+let editorContainer = document.getElementById("editorContainer");
+let editor = document.getElementById("editor");
+let editorOverlay = document.getElementById("editorOverlay");
+let sideBarFileTreeContainer = document.getElementById("sideBarFileTreeContainer");
+let sideBarFileContainer = document.getElementById("sideBarFileContainer");
+let sideBarOptionsContainer = document.getElementById("sideBarOptionsContainer");
+let dialogInput = document.getElementById("dialogInput");
+let nameFileDialogTitle = document.getElementById("nameFileDialogTitle");
+let compileDialogTitle = document.getElementById("compileDialogTitle");
+let compileDialogText = document.getElementById("compileDialogText");
+let compileDialogTitleImage = document.getElementById("compileDialogTitleImage");
+let compileDialogSaveButton = document.getElementById("compileDialogSaveButton");
+let currentFile;
+let currentFileName;
+let activeDialogId;
+let activeDialogCallback;
+let highlighter = new CodeHighlighter();
+let guiHighlighter = new CodeHighlighter();
+let fileStructure = {
+  "main.cc": {
+    "type": 0,
+    "content": "..."
+  },
+  "rainsim.cc": {
+    "type": 0,
+    "content": "..."
+  },
+  "specs.cc": {
+    "type": 0,
+    "content": "..."
+  },
+  "basics.cc": {
+    "type": 0,
+    "content": "..."
+  },
+  "images": {
+    "type": 1,
+    "unfolded": false,
+    "content": {
+      "innerfile1.cc": {
+        "type": 0,
+        "content": "..."
+      },
+      "innerfile2.cc": {
+        "type": 0,
+        "content": "..."
+      }
+    }
+  },
+  "interface.gui": {
+    "type": 0,
+    "content": "..."
+  },
+  "log.txt": {
+    "type": 0,
+    "content": "Welcome to the logger!\n\nNo highlighting is added to this file since it\ndoes not have the file extension .cc or .gui"
+  }
+};
+
+
+let mainFileTemplate = `# File created on 23.05.2022
+# --------------------------
+
+main()
+  var x = 7
+  var y = 32
+  if (x+y < 50)
+    print("Hello World, 7+32<50")
+  else
+    print("Hello World, 7+32>50")`;
+
+let specsTemplate = `# Import External Code
+IMPORT Basics
+IMPORT NeuralNetwork
+IMPORT GUI as ui
+IMPORT "ecdh.cc" as EllipticCurve
+
+# Setup GUI
+ui.parse("interface.gui", "interface2.gui")
+ui.start()
+
+# Variables
+var name = "Merlin"
+var age = 19
+var height = 1.78m
+var isAlive = true
+
+# Constants
+const PI = 3.14159265358
+const E = 2.71828182846
+
+# Cleaner without Braces
+for (var i = 0, i < 20, i++)
+  print("Turn [i+1] of 20")
+  if (2*i > 12) break
+
+# Tuples are the new Arrays
+var names = ("Olaf", "Robert", "Annalena")
+var mixedTypes = ("Hello", 12, date, 7.2)
+var nested = (12, (1, 4), (1, (2, 3), 4))
+var primes = (2, 3, 5, 7, 11)`;
+
+
+let basicsTemplate = `# If the compiler can handle everything presented in this
+# file, CleanCode is done. Everything else, including all
+# of the UI Stuff, multithreading or so can be implemented
+# later in CleanCode via Standard Libraries.
+
+# Data Types:
+# - Integer
+# - Float
+# - Boolean
+# - Object
+# - ENUM
+# - Undefined
+
+
+# ---------------------------------------------------
+# PRECOMPILER
+# ---------------------------------------------------
+
+# Import External Code
+IMPORT NeuralNetwork                  # Import CleanCode libraries
+IMPORT "ecdh.cc" as EllipticCurve     # wrap file content in class or rename class if already in class
+IMPORT "rainsim.cc"                   # simple textual import
+
+# Compiler directives
+COMPILETO TERMINAL
+...
+END
+
+# Native Code
+var number = 12
+NATIVECODE
+int arr[] = {2, 4, 8, 9};
+int val = &(arr+3);
+double dd = (double)number * val;
+number = (int)dd+3
+END
+
+# Custom Number Suffixes
+DEFINESUFFIX s 1000       # Second
+DEFINESUFFIX cm 0.01      # Centimeter
+DEFINESUFFIX m 1          # Meter
+DEFINESUFFIX km 1000      # Kilometer
+DEFINESUFFIX ° 0.017453   # Degrees to radians
+if (12km == 12000m)       # True
+
+
+
+
+# ---------------------------------------------------
+# Language itself
+# ---------------------------------------------------
+
+# Variables & Constants
+var name = "Merlin" / 19 / 1.78m / true / undefined
+var x, y = 4, 5
+x, y = y, x
+const PI = 3.141592653589
+
+# ENUMS
+const direction = UP, RIGHT, DOWN, LEFT
+var dir = DOWN + 3
+if (dir == RIGHT)
+  print("Ah, it's right")
+  dir = UP
+if (dir == direction)
+  print("It's a direction")
+  dir += 1
+
+# If statements
+if (a == b & c < d | 3 >= f)
+  print("eq")
+else
+  print("neq")
+end
+
+if (a == b) print("eq")
+if (a == b) print("eq") else print("neq")
+if (a == b) 3 else 4
+
+
+# For loops
+for (var i = 0, i < 20, i++)
+  ...
+for (var elem in tuple)
+  ...
+
+# While Loops
+while (cond)
+  ...
+end
+
+# Define & Call Functions (sorted, default, mandatory arguments, pass function as arg, etc)
+calculatePrimesUpTo(max)
+  var primes = (2)
+  for (var i = 3, i < max, i += 2)
+    var isPrime = primes.forEvery((p) i%p != 0)
+    if isPrime primes.append(i)
+  return primes
+end
+
+# Objects
+class Tuple
+  var x,y
+  init(b)
+    x = 3*b
+    this.y = 7
+  method(i, j)
+    return i*j
+  static staticMethod(i, j)
+    return 2*i*j
+  private privateMethod(i, j)
+    return 4*i*j
+  # Overload: init() + - * / < > == !
+  add(a) ...
+  lessThan(a) ...
+  equals(a) ...
+  not() ...
+end
+
+var tpl = new Tuple(6)
+var xx = Tuple.staticMethod(1, 2)
+tpl.method(1, 2)
+
+
+# Custom Class Initialization
+var str = new String((8, 17, 43, 43, 45, 0))  # stupid class
+var str = "Hello"                             # intelligent initialization of class
+
+class String initas "..."
+  var letters = ()
+  init(letters)
+    this.letters = letters
+  end
+end
+
+class Tuple initas (...)
+  init(elems)
+    ...
+  end
+end
+
+class Set initas {...}
+  init(elems)
+    ...
+  end
+end`;
+
+
+
+let raindropTemplate = `# Raindrop Class
+class RainDrop
+  var x, y, size, speed, circle
+  init(x, y, size)
+    this.x = x
+    this.y = y
+    this.size = size
+    speed = size
+    circle = new Circle(size)
+    circle.color = new Color(20, 170, 210)
+  fall()
+    this.y += this.speed
+  draw()
+    circle.draw(x, y)
+end # Optional
+
+
+# Program Entry Point
+main()
+  const dropCount = 200
+  var drops = ()
+  for (var i = 0, i < dropCount, i++)
+    var x = random(width)
+    var size = random(15, 20)
+    drops.append(new Drop(x, -size, size))
+    drops.get(-1).draw()
+  print("Created initial drops")
+  drawLoop(drops)
+end # Optional
+
+
+# Loop for updating raindrops continously
+drawLoop(drops)
+  for (var drop in drops)
+    drop.fall()
+    if (drop.y > height)
+      drop.size = random(15, 20)
+      drop.y = -drop.size
+      drop.x = random(0, width)
+    drop.draw()
+  wait(16.66ms)
+  drawLoop(drops)
+end # Optional`;
+
+let interfaceTemplate = `# Live Variables: Changes applied to these variables automatically result in an UI refresh (except if they are static!)
+var font1 = new Font("/src/futura.ttf")
+var font2 = new Font("/src/americanTypewriter.ttf")
+var font3 = new Font("/src/openSans.ttf")
+var mainHeaderStyle = style.container
+var loginDescription = "Use your private ID to create a new account"
+var headerColor = Color.oceanBlue
+static version = "1.2"
+
+# Main Screen UI
+component mainScreen
+  box: id = header, style = $mainHeaderStyle
+  box: id = body, style = container
+    box: id = innerBody, style = element + container
+    image: id = profileIcon, style = icon, src = "/data/profile.png"
+      box: id = nestedBox, style = nestedBox
+      box: id = thirdBox, style = nestedBox
+      box: id = lulLol, style = idk
+  2*canvas: id = myCanvas, style = canvas
+  box: id = boxContainer
+    12*boxElement: id = box, style = subBoxLul
+
+# UI of another Element
+component boxElement
+  10*box: id = header, style = container
+  image: id = profileIcon, style = icon, src = "/data/profile.png"
+  image: id = closeIcon, style = icon, src = "/data/close.png"
+
+# Yet another UI component
+component loginScreen
+  text: id = loginTitle, style = title, content = "Log in Here!"
+  text: id = loginTitle, style = title, content = $loginDescription
+  ...
+
+
+# Styles all the elements in a reusable manner
+style all
+  font: font1
+  color: white
+  darkMode: dynamic
+
+style header
+  width: 100pw
+  height: 50px
+  color: $headerColor
+  stick: top
+
+style container
+  width: 100pw
+  height: 100ph
+  color: skyBlue
+  margin: 7px
+  padding: 10px, 20px, 10px, 0px
+  cornerRadius: 12px
+  orientation: vertical
+  centerX: true
+  centerY: true
+
+style innerBody extends container
+  color: red
+  font: font3
+  darkMode: disabled
+  cornerSmoothing: 20%
+`;
+
+let testCode = `# File created on 23.05.2022
+# Copyright: Merlin Hof
+
+# Basic Variables
+IMPORT "rainsim.cc"
+var x = 1+(2-3*(4+2))/5*(8-2)
+var name = "Merlin"
+var height = 1.75
+var age = 19
+
+# Constants
+const magicNumber = 1+12*getAge(4/7, name, 3*innerFunc(5-2, name), x)/93
+const pi = 3.1415926535897932384626
+
+# Functions Definitions
+func1() return 2*4
+func2(x) return 2*x
+func3()
+  var x = 12
+  return 2*x
+func4(x, y)
+  var n = 2*x+y
+  return n
+func5()
+  var n = getData(4)
+  age = 8*n
+
+# Function Calls
+func1()
+func2(5)
+begin(1, 2, age*(4+2)/8, 12)
+
+# If Statements
+if (3 < 4) print("Hello World")
+if (2*3 != 5+1) return 7+8 else print("Lol?")
+if ((3 != 7 | true == !false) & b-2 > 7)
+  print("Trueblock")
+else
+  var msg = "falseBlock"
+  print(msg)
+
+# -------------`;
+
+// Setup
+fileStructure["main.cc"].content = testCode;
+fileStructure["specs.cc"].content = specsTemplate;
+fileStructure["basics.cc"].content = basicsTemplate;
+fileStructure["rainsim.cc"].content = raindropTemplate;
+fileStructure["interface.gui"].content = interfaceTemplate;
+highlighter.defaultColor = "rgb(220, 230, 230)";
+highlighter.stringColor = "rgb(10, 220, 140)";
+highlighter.keywordColor = "rgb(160, 120, 235)";
+highlighter.functionColor = "rgb(66, 163, 225)";
+highlighter.numberColor = "rgb(230, 190, 70)";
+highlighter.symbolColor = "rgb(66, 163, 225)";
+guiHighlighter.defaultColor = highlighter.defaultColor;
+guiHighlighter.stringColor = highlighter.stringColor;
+guiHighlighter.keywordColor = highlighter.keywordColor;
+guiHighlighter.functionColor = highlighter.functionColor;
+guiHighlighter.numberColor = highlighter.numberColor;
+guiHighlighter.symbolColor = highlighter.symbolColor;
+guiHighlighter.keywords = "true false var const static new component style extends id content src font color darkMode width height stick margin padding cornerRadius orientation centerX centerY top bottom left right dynamic vertical horizontal cornerSmoothing disabled".split(" ");
+showFileTreeView();
+updateFileTree();
+selectFile("main.cc");
+
+// Position the editorOverlay properly
+setTimeout(() => {
+  let boundingBox = editor.getBoundingClientRect();
+  editorOverlay.style.left = boundingBox.x;
+  editorOverlay.style.top = boundingBox.y;
+  editorOverlay.style.width = boundingBox.clientWidth;
+  editorOverlay.style.height = boundingBox.clientHeight;
+}, 200);
+
+// Draws the line numbers up to cnt
+function updateLineNumbers(cnt) {
+  lineNumberContainer.innerHTML = "";
+  for (let i = 0; i < cnt; i++) {
+    lineNumberContainer.innerHTML += (i+1)+"<br>";
+  }
+}
+
+// Updates size, highlighting of editor and line numbers
+function editorCodeChanged() {
+  //console.log(editor.selectionStart);
+  let rawCode = editor.value.replaceAll("\n", "<br>");
+  currentFile.content = editor.value;
+  if (currentFileName.endsWith(".cc")) {
+    editorOverlay.innerHTML = highlighter.highlightCode(rawCode);
+  } else if (currentFileName.endsWith(".gui")) {
+    editorOverlay.innerHTML = guiHighlighter.highlightCode(rawCode);
+  } else {
+    editorOverlay.innerHTML = rawCode;
+  }
+  let numberOfLines = 1+(rawCode.length - rawCode.replaceAll("<br>", "").length)/4;
+  updateLineNumbers(numberOfLines);
+  editor.style.height = 100+lineNumberContainer.getBoundingClientRect().height;
+}
+
+// Redraws the entire filetree
+function updateFileTree() {
+  sideBarFileContainer.innerHTML = "";
+  for (let name in fileStructure) {
+    let elem = fileStructure[name]
+    if (elem.type == 0) {
+      let icon = "file.png";
+      if (name.endsWith(".cc")) icon = "code.png";
+      if (name.endsWith(".gui")) icon = "design.png";
+      let fileElement = `<div class="sideBarFile" id="file${name}" onclick="selectFile('${name}')">
+        <img class="sideBarFileIcon" src="images/${icon}">
+        ${name}
+      </div>`;
+      sideBarFileContainer.innerHTML += fileElement;
+    } else {
+      let fileElement = `<div class="sideBarFile" id="file${name}" onclick="selectFile('${name}')">
+        <img class="sideBarFileIcon" src="images/folder.png">
+        ${name}
+        <img class="sideBarFolderArrowIcon" src="images/arrow.png">
+      </div>`;
+      sideBarFileContainer.innerHTML += fileElement;
+    }
+  }
+}
+
+// Selects a file by name
+function selectFile(name) {
+  let elem = fileStructure[name];
+  editor.style.display = "inline-block";
+  for (let filename in fileStructure) {
+    document.getElementById("file" + filename).classList.remove("sideBarFileSelected");
+  }
+  document.getElementById("file" + name).classList.add("sideBarFileSelected");
+  currentFileName = name;
+  currentFile = fileStructure[name];
+  editorOverlay.style.opacity = 0;
+  editorContainer.style.opacity = 1;
+  setTimeout(() => {
+    editorContainer.scrollTop = 0;
+    if (elem.type == 0) {
+      editor.value = currentFile.content;
+      editorCodeChanged();
+    } else {
+      editor.style.display = "none";
+      editorOverlay.innerHTML = "Beta: Folders are not working yet ;(";
+    }
+    editorOverlay.style.opacity = 1;
+  }, 200);
+
+  // Fold & Unfold Folder
+  if (elem.type == 1) {
+    let additionalHeight = Object.keys(elem).length * 50;
+    if (elem.unfolded) additionalHeight = 10;
+    elem.unfolded = !elem.unfolded;
+    document.getElementById("file" + name).style.paddingBottom = additionalHeight;
+  }
+}
+
+// sideBarViewSelector Options
+function showFileTreeView() {
+  sideBarOptionsContainer.style.opacity = 0;
+  setTimeout(() => {
+    sideBarFileTreeContainer.style.display = "block";
+    sideBarOptionsContainer.style.display = "none";
+    setTimeout(() => {
+      sideBarFileTreeContainer.style.opacity = 1;
+    }, 10);
+  }, 150);
+  editorOverlay.style.opacity = 1;
+  lineNumberContainer.style.opacity = 1;
+  document.getElementById("sideBarViewSelectorButtonOptions").classList.remove("sideBarViewSelectorButtonSelected");
+  document.getElementById("sideBarViewSelectorButtonFileTree").classList.add("sideBarViewSelectorButtonSelected");
+}
+function showOptionsView() {
+  sideBarFileTreeContainer.style.opacity = 0;
+  setTimeout(() => {
+    sideBarOptionsContainer.style.display = "block";
+    sideBarFileTreeContainer.style.display = "none";
+    setTimeout(() => {
+      sideBarOptionsContainer.style.opacity = 1;
+    }, 10);
+  }, 150);
+  editorOverlay.style.opacity = 0;
+  lineNumberContainer.style.opacity = 0;
+  document.getElementById("sideBarViewSelectorButtonOptions").classList.add("sideBarViewSelectorButtonSelected");
+  document.getElementById("sideBarViewSelectorButtonFileTree").classList.remove("sideBarViewSelectorButtonSelected");
+}
+
+// Synchronizes scroll of editor and editor overlay
+function syncScroll() {
+  editorOverlay.style.left = editor.getBoundingClientRect().x;
+  let scrollY = editorContainer.scrollTop;
+  editorOverlay.style.top = 20-scrollY;
+}
+
+
+
+
+// ------------------------------------------------------------------------------------------------
+// Dialog Functions
+// ------------------------------------------------------------------------------------------------
+
+function showDialog(id) {
+  activeDialogId = id;
+  let container = document.getElementById(id + "Container");
+  let content = document.getElementById(id);
+  container.style.display = "flex";
+  setTimeout(() => {
+    container.style.opacity = 1;
+    content.style.transform = "scale(1)";
+  }, 20);
+}
+
+function hideDialog() {
+  let container = document.getElementById(activeDialogId + "Container");
+  let content = document.getElementById(activeDialogId);
+  container.style.opacity = 0;
+  content.style.transform = "scale(0.8)";
+  setTimeout(() => {
+    container.style.display = "none";
+  }, 300);
+}
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------
+// File Management
+// ------------------------------------------------------------------------------------------------
+
+function createNewFileUI() {
+  showDialog("nameFileDialog");
+  nameFileDialogTitle.innerText = "Name your File";
+  dialogInput.value = "newFile.cc";
+  dialogSaveButtonClicked = function() {
+    hideDialog();
+    let newName = dialogInput.value;
+    createNewFile(newName, {type: 0, content: "# File created on " + getCurrentDateString() + "\n# Copyright: _______________\n"});
+    currentFile = null;
+    selectFile(newName);
+  }
+}
+
+function createNewFile(name, content) {
+  fileStructure[name] = content;
+  updateFileTree();
+}
+
+function createNewFolderUI() {
+  showDialog("nameFileDialog");
+  nameFileDialogTitle.innerText = "Name your Folder";
+  dialogInput.value = "newFolder";
+  dialogSaveButtonClicked = function() {
+    hideDialog();
+    let newName = dialogInput.value;
+    createNewFile(newName, {type: 1, content: ""});
+    currentFile = null;
+    selectFile(newName);
+  }
+}
+
+function renameFileUI() {
+  showDialog("nameFileDialog");
+  nameFileDialogTitle.innerText = "Rename";
+  let oldName = currentFileName;
+  dialogInput.value = currentFileName;
+  dialogSaveButtonClicked = function() {
+    hideDialog();
+    let newName = dialogInput.value;
+    createNewFile(newName, currentFile);
+    deleteFile(oldName);
+    currentFile = null;
+    selectFile(newName);
+  }
+}
+
+function deleteFileUI() {
+  showDialog("deleteFileDialog");
+  dialogDeleteButtonClicked = function() {
+    hideDialog();
+    deleteFile(currentFileName);
+    selectFile(Object.keys(fileStructure)[0]);
+  }
+}
+
+function deleteFile(name) {
+  delete fileStructure[name];
+  updateFileTree();
+}
+
+
+
+// ------------------------------------------------------------------------------------------------
+// Compiler Interface
+// ------------------------------------------------------------------------------------------------
+
+function showCompileDialog(option) {
+  let implementedOptions = [8];
+  let compiler = new Compiler(option);
+  compiler.project = fileStructure;
+  let name = compiler.getOptionName();
+  let icon = compiler.getOptionIcon();
+  showDialog("compileDialog");
+  compileDialogTitle.innerText = "Compiling to " + name;
+  compileDialogTitleImage.src = "images/" + icon + ".png";
+  compileDialogText.innerText = "Are you ready?";
+  compileDialogSaveButton.style.display = "inline-block";
+  compileDialogSaveButton.src = "images/play.png";
+  if (!implementedOptions.includes(option)) {
+    compileDialogText.innerText = "This option is not implemented yet";
+    compileDialogSaveButton.style.display = "none";
+  }
+
+  dialogSaveButtonClicked = function() {
+    compileDialogSaveButton.src = "images/save.png";
+    compiler.startCompilation((msg) => {
+      compileDialogText.innerHTML = msg;
+    });
+
+    dialogSaveButtonClicked = () => hideDialog();
+  }
+}
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------
+// Helper Functions
+// ------------------------------------------------------------------------------------------------
+
+function getCurrentDateString() {
+  let date = new Date();
+  return zfill(date.getDate()) + "." + zfill(date.getMonth()) + "." + date.getFullYear();
+}
+function zfill(val) {
+  return val < 10 ? "0"+val : val;
+}
+
+</script>

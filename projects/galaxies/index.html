@@ -1,0 +1,153 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Galaxy Collision Simulation</title>
+      <meta name="description" content="A beautiful simulation of the collisions of several galaxies somewhere in the universe." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/galaxies/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+      <div onclick="start()" class="button" id="startbutton">START</div>
+      <div id="reloadButtonContainer" onclick="start()"><img id="reloadButton" src="reload.png" /></div>
+      <audio id="audioplayer" loop>
+         <source src="music.mp3" type="audio/mp3" />
+      </audio>
+   </body>
+
+   <script>
+      // Prepare Canvas
+      let canvas = document.getElementById("canvas");
+      let height = canvas.clientHeight;
+      let width = canvas.clientWidth;
+      let ctx = canvas.getContext("2d");
+      let pixelFactor = window.devicePixelRatio;
+      canvas.setAttribute("height", height * pixelFactor);
+      canvas.setAttribute("width", width * pixelFactor);
+      ctx.scale(pixelFactor, pixelFactor);
+
+      // Variables
+      let particles = [];
+      let interval;
+
+      // Particle Class
+      class Particle {
+         constructor() {
+            this.x = Math.random(1) * width;
+            this.y = Math.random(1) * height;
+            this.xspeed = 1 - Math.random(1) * 2;
+            this.yspeed = 1 - Math.random(1) * 2;
+            this.force = 0;
+         }
+      }
+
+      class Galaxy {
+         // Creates a Galaxy at x, y with radius r using n particles
+         static create(centerX, centerY, radius, particleCount) {
+            let galaxySpeedX = 3 - Math.random() * 6;
+            let galaxySpeedY = 3 - Math.random() * 6;
+            let density = particleCount / (radius * radius);
+            let rotationSpeed = 1.8 * density * (Math.random() < 0.5 ? -1 : 1);
+
+            for (let i = 0; i < particleCount; i++) {
+               let x, y, distFromCenter;
+               do {
+                  x = centerX - 2 * radius + Math.random() * 4 * radius;
+                  y = centerY - 2 * radius + Math.random() * 4 * radius;
+                  distFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+               } while (Math.random() < distFromCenter / (2 * radius));
+
+               let particle = new Particle();
+               particle.x = x;
+               particle.y = y;
+
+               // Set speed based on position to create galaxy rotation
+               let deltaX = x - centerX;
+               let deltaY = y - centerY;
+               let distToCenter = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+               let angle = Math.asin(deltaY / distToCenter);
+
+               let speedX = rotationSpeed * Math.sin(angle);
+               let speedY = deltaX < 0 ? 1 : -1;
+               speedY *= rotationSpeed * Math.cos(angle);
+               particle.xspeed = (speedX * distToCenter) / 25 + galaxySpeedX;
+               particle.yspeed = (speedY * distToCenter) / 25 + galaxySpeedY;
+               particles.push(particle);
+            }
+         }
+      }
+
+      // Start the simulation
+      function start() {
+         document.getElementById("audioplayer").play();
+         document.getElementById("startbutton").style.transform = "scale(0.0, 0.0)";
+         document.getElementById("reloadButtonContainer").style.display = "flex";
+
+         // Create Galaxies
+         particles = [];
+         for (let i = 0; i < 3; i++) {
+            Galaxy.create(Math.random() * width, Math.random() * height, 20 + 10 * Math.random(), 400 + 300 * Math.random());
+         }
+         clearInterval(interval);
+         interval = setInterval(updateParticles, 1000 / 30);
+      }
+
+      // Simulate
+      function updateParticles() {
+         let centerOfGravity = { x: 0, y: 0 };
+         for (let i = 0; i < particles.length; i++) {
+            let particle = particles[i];
+            particle.x += particle.xspeed;
+            particle.y += particle.yspeed;
+            centerOfGravity.x += particle.x;
+            centerOfGravity.y += particle.y;
+            let forceX = 0.0;
+            let forceY = 0.0;
+            let absForceX = 0;
+            let absForceY = 0;
+            for (let j = 0; j < particles.length; j++) {
+               if (j != i) {
+                  let deltaX = particle.x - particles[j].x;
+                  let deltaY = particle.y - particles[j].y;
+                  let dist = deltaX * deltaX + deltaY * deltaY;
+                  let xForce = 0.9 * (1 / dist) * deltaX;
+                  let yForce = 0.9 * (1 / dist) * deltaY;
+                  forceX += xForce;
+                  forceY += yForce;
+                  absForceX += Math.abs(xForce);
+                  absForceY += Math.abs(yForce);
+               }
+            }
+            particle.xspeed -= 0.01 * forceX;
+            particle.yspeed -= 0.01 * forceY;
+            particle.force = Math.sqrt(Math.pow(absForceX, 2) + Math.pow(absForceY, 2));
+         }
+         centerOfGravity.x /= particles.length;
+         centerOfGravity.y /= particles.length;
+
+         // Draw Grid
+         // ctx.clearRect(0, 0, width, height);
+         // ctx.fillStyle = 'rgb(10, 15, 25)';
+         // for (let x = (centerOfGravity.y - width/2)%30; x < width; x += 30) {
+         //   ctx.fillRect(x, 0, 3, height);
+         // }
+         // for (let y = (centerOfGravity.y - height/2)%30; y < height; y += 30) {
+         //   ctx.fillRect(0, y, width, 3);
+         // }
+         ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+         ctx.fillRect(0, 0, width, height);
+
+         // Draw Galaxies
+         for (let i = 0; i < particles.length; i++) {
+            ctx.beginPath();
+            let val = 5 * particles[i].force;
+            ctx.fillStyle = "rgb(" + 1.2 * val + ", " + 2.3 * val + ", " + 4.5 * val + ")";
+            ctx.arc(particles[i].x - (centerOfGravity.x - width / 2), particles[i].y - (centerOfGravity.y - height / 2), 2, 0, 2 * Math.PI);
+            ctx.fill();
+         }
+      }
+   </script>
+</html>

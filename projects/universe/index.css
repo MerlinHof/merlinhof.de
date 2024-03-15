@@ -1,0 +1,74 @@
+body {
+    background-color: #000000;
+    color: #404040;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#canvas {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    touch-action: none;
+    z-index: 1;
+}
+
+.button {
+  height: 45px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 20px;
+  border: none;
+  border-radius: 12px;
+  transition: all 0.5s;
+  outline: none;
+  padding-left: 20px;
+  padding-right: 20px;
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 50px);
+  z-index: 2;
+}
+
+.button:hover {
+  transform: scale(1.5, 1.5);
+  background-color: #2196f3;
+  box-shadow: 0px 0px 50px rgba(33, 150, 243, 0.3);
+}
+
+#reloadButtonContainer {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 3;
+  box-sizing: border-box;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#reloadButtonContainer:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.2);
+}
+#reloadButtonContainer:active {
+  transform: scale(0.8);
+}
+#reloadButton {
+  width: 50%;
+  height: 50%;
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .button:hover {
+    transform: scale(1.0, 1.0);
+  }
+  #reloadButtonContainer:hover {
+    background-color: rgba(255, 255, 255, 0.0);
+    transform: scale(1.0);
+  }
+}

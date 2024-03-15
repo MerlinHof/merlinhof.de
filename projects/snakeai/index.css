@@ -1,0 +1,28 @@
+body {
+  padding: 0px;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(230, 235, 245);
+  max-width: 600px;
+  max-height: 600px;
+}
+
+/* Light mode*/
+@media (prefers-color-scheme: light) {
+  .reload {
+    background-color: #eceff1;
+  }
+  .score {
+    color: #000000;
+  }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .reload:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

@@ -1,0 +1,21 @@
+* {
+   max-width: 1000px;
+}
+
+.text {
+   margin-left: 0px;
+   font-family: bold;
+}
+
+.image {
+   width: 50%;
+   border-radius: 20px;
+   margin-top: 20px;
+}
+
+/* Mobile mode */
+@media only screen and (max-width: 640px) {
+   .image {
+      width: 100%;
+   }
+}

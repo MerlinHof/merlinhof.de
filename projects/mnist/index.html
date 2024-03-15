@@ -1,0 +1,401 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>MNIST AI</title>
+      <meta name="description" content="Train a Neural Network to identify handwritten digits" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/mnist/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+      <script type="text/javascript"></script>
+   </head>
+
+   <body>
+      <t class="title" id="title">Digit AI</t><br />
+      <div style="margin-right: 10px; float: left">
+         <canvas id="canvas"></canvas><br />
+         <div id="controlContainer">
+            <div class="button" type="button" onclick="startTraining();">TRAIN</div>
+            <div class="button" type="button" onclick="startTesting();">TEST</div>
+            <div class="button" type="button" id="clearButton" onclick="clearCanvas();">CLEAR</div>
+         </div>
+         <br />
+         <t class="text" id="statusText"></t>
+         <div class="progressContainer" id="progressContainer">
+            <div class="progressBar" id="progressBar"></div>
+         </div>
+      </div>
+      <div id="answerContainer"></div>
+      <div id="explanationContainer">
+         <t class="title" id="explanationTitle">While you patiently wait for that progress bar to finish, your computer...</t><br /><br />
+         <t class="bulletPoint">•</t><t class="text bulletPointText">approximates the minimum of a function in <b>266.610</b> dimensions</t><br />
+         <t class="bulletPoint">•</t><t class="text bulletPointText">looks at <b>35.000</b> individual images twice</t><br />
+         <t class="bulletPoint">•</t><t class="text bulletPointText">evaluates more than <b>54 million</b> pixels</t><br />
+         <t class="bulletPoint">•</t><t class="text bulletPointText">makes more than <b>40 billion</b> calculations</t><br />
+         <t class="bulletPoint">•</t><t class="text bulletPointText">will get <b>really</b> hot</t><br />
+      </div>
+   </body>
+</html>
+
+<script src="nn.js"></script>
+<script>
+   // Prepare Canvas
+   let canvas = document.getElementById("canvas");
+   let height = canvas.clientHeight;
+   let width = canvas.clientWidth;
+   let ctx = canvas.getContext("2d");
+   let pixelFactor = window.devicePixelRatio;
+   canvas.setAttribute("height", height * pixelFactor);
+   canvas.setAttribute("width", width * pixelFactor);
+   ctx.scale(pixelFactor, pixelFactor);
+   ctx.lineCap = "round";
+
+   // Variables
+   let trainingImages = [];
+   let trainingLabels = [];
+   let pixels = [];
+   let mouseDown = false;
+   let prevX;
+   let prevY;
+   let fetched = false;
+   let nn = new NeuralNetwork([784, 120, 40, 10]);
+
+   // Prepare
+   clearCanvas();
+
+   // Create Answer Elements
+   let answerContainer = document.getElementById("answerContainer");
+   for (let i = 0; i < 10; i++) {
+      answerContainer.innerHTML += `
+  <div class="answer">
+  <div class="answerCircle" id="answerCircle${i}">${i}</div>
+  <div class="progressContainer progressContainerAnswer"><div class="progressBar" id="progressBarAnswer${i}"></div></div>
+  </div>`;
+   }
+
+   // Fetches Training Data (in batches of 1000)
+   async function fetchData(arg) {
+      if (fetched) return;
+      fetched = true;
+      log("Fetching Data...");
+      let formData = new FormData();
+      for (let i = 0; i < 60; i++) {
+         setProgressBar((i / 60) * 100, 0);
+         formData.set("block", i);
+         formData.set("type", 0);
+         await fetch("getData.php", {
+            method: "POST",
+            body: formData,
+         })
+            .then((response) => response.text())
+            .then((data) => {
+               trainingImages = trainingImages.concat(JSON.parse(data));
+            });
+
+         formData.set("type", 1);
+         await fetch("getData.php", {
+            method: "POST",
+            body: formData,
+         })
+            .then((response) => response.text())
+            .then((data) => {
+               trainingLabels = trainingLabels.concat(JSON.parse(data));
+            });
+      }
+
+      for (let j = 0; j < trainingImages.length; j++) {
+         trainingImages[j] /= 255;
+      }
+      clearCanvas();
+   }
+
+   // Starts the Training
+   async function startTraining() {
+      await fetchData();
+      setTimeout(() => {
+         document.getElementById("explanationContainer").style.display = "inline-block";
+         setTimeout(() => {
+            document.getElementById("explanationContainer").style.transform = "scale(1)";
+            document.getElementById("explanationContainer").style.opacity = "1";
+         }, 10);
+      }, 5000);
+      setProgressBar(0, 0);
+      log("Training...");
+      await wait(300);
+
+      let dataSet = [];
+      let sampleSolution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 35000; i++) {
+         let inputs = trainingImages.slice(i * 784, i * 784 + 784);
+         let solution = [...sampleSolution];
+         solution[trainingLabels[i]] = 1;
+         dataSet.push([inputs, solution]);
+      }
+      nn.epochs = 2;
+      nn.learningRate = 0.02;
+      nn.train(dataSet, (prog, error) => {
+         setProgressBar(prog, 0);
+         if (prog == 100) {
+            document.getElementById("explanationContainer").style.transform = "scale(0)";
+            document.getElementById("explanationContainer").style.opacity = "0";
+            startTesting();
+         }
+      });
+   }
+
+   // Tests the AI
+   async function startTesting() {
+      await fetchData();
+      log("Testing...");
+      await wait(300);
+
+      let dataSet = [];
+      for (let i = 0; i < 1000; i++) {
+         let ind = 59999 - i;
+         let inputs = trainingImages.slice(ind * 784, ind * 784 + 784);
+         dataSet.push([inputs, trainingLabels[ind]]);
+      }
+      let correct = 0;
+      for (let i = 0; i < dataSet.length; i++) {
+         let prediction = nn.predict(dataSet[i][0]);
+         if (prediction.indexOf(Math.max(...prediction)) == dataSet[i][1]) {
+            correct++;
+         }
+      }
+      let accuracy = Math.round((correct / dataSet.length) * 1000) / 10;
+      log(accuracy + "% accurate");
+      setProgressBar(accuracy, 1);
+   }
+
+   // Logs message to the screen
+   function log(str) {
+      document.getElementById("statusText").innerHTML = str;
+   }
+
+   // Mouse & Touch Events
+   document.body.addEventListener("mousedown", (event) => {
+      mouseDown = true;
+   });
+   document.body.addEventListener("mouseup", (event) => {
+      mouseDown = false;
+      prevX = undefined;
+   });
+   document.getElementById("canvas").addEventListener("mousemove", (event) => {
+      mouseMoved(event);
+   });
+   document.body.addEventListener("touchstart", (event) => {
+      mouseDown = true;
+   });
+   document.body.addEventListener("touchend", (event) => {
+      mouseDown = false;
+      prevX = undefined;
+   });
+   document.body.addEventListener("touchcancel", (event) => {
+      mouseDown = false;
+      prevX = undefined;
+   });
+   document.getElementById("canvas").addEventListener("touchmove", (event) => {
+      mouseMoved(event);
+   });
+
+   function mouseMoved(event) {
+      event.preventDefault();
+      if (mouseDown) {
+         let br = document.getElementById("canvas").getBoundingClientRect();
+         let pos = {};
+         if (event.type == "touchmove") {
+            var evt = typeof event.originalEvent === "undefined" ? event : event.originalEvent;
+            var touch = evt.touches[0] || evt.changedTouches[0];
+            pos = { x: touch.pageX - br.left, y: touch.pageY - br.top };
+         } else if (event.type == "mousedown" || event.type == "mousemove") {
+            pos = { x: event.clientX - br.left, y: event.clientY - br.top };
+         }
+
+         let endX = Math.floor(pos.x / 10);
+         let endY = Math.floor(pos.y / 10);
+         if (prevX == undefined) {
+            prevX = endX;
+            prevY = endY;
+         }
+         if (endX != prevX || endX != prevY) {
+            let steps = Math.max(Math.abs(endX - prevX), Math.abs(endY - prevY)) + 0;
+            for (let i = 1; i <= steps; i++) {
+               let x = Math.floor((endX - (i * (endX - prevX)) / steps) / 1);
+               let y = Math.floor((endY - (i * (endY - prevY)) / steps) / 1);
+               pixels[y * 28 + x] = 1;
+               pixels[y * 28 + x + 1] += 0.42;
+               pixels[y * 28 + x - 1] += 0.42;
+               pixels[(y + 1) * 28 + x] += 0.42;
+               pixels[(y - 1) * 28 + x] += 0.42;
+               pixels[(y + 1) * 28 + x + 1] += 0.2;
+               pixels[(y - 1) * 28 + x - 1] += 0.2;
+               pixels[(y - 1) * 28 + x + 1] += 0.2;
+               pixels[(y + 1) * 28 + x - 1] += 0.2;
+            }
+            predictDigit(centerImage());
+            document.getElementById("clearButton").style.opacity = "1";
+            document.getElementById("clearButton").style.transform = "scale(1)";
+            updateCanvas(pixels);
+         }
+         prevX = endX;
+         prevY = endY;
+      }
+   }
+
+   async function predictDigit(img) {
+      let prediction = nn.predict(img);
+      let answer = prediction.indexOf(Math.max(...prediction));
+
+      let sum = 0;
+      for (let i = 0; i < 10; i++) {
+         sum += prediction[i];
+      }
+
+      // Update Answer Container
+      document.getElementById("answerContainer").style.display = "block";
+      await wait(10);
+      document.getElementById("answerContainer").style.transform = "scale(1)";
+      document.getElementById("answerContainer").style.opacity = "1";
+      for (let i = 0; i < 10; i++) {
+         let prob = Math.round((prediction[i] / sum) * 100);
+         setProgressBar(prob, 1, "progressBarAnswer" + i);
+      }
+
+      for (let i = 0; i < 10; i++) {
+         document.getElementById("answerCircle" + i).style.backgroundColor = "var(--answerCircleBackgroundColor)";
+         document.getElementById("answerCircle" + i).style.color = "var(--textColor)";
+      }
+      let maxIndex = prediction.indexOf(Math.max(...prediction));
+      document.getElementById("answerCircle" + maxIndex).style.backgroundColor = "rgba(40, 140, 255, 0.2)";
+      document.getElementById("answerCircle" + maxIndex).style.color = "rgb(40, 140, 255)";
+   }
+
+   // Draws the passed array to the canvas
+   function updateCanvas(arr) {
+      for (let y = 0; y < 28; y++) {
+         for (let x = 0; x < 28; x++) {
+            let value = arr[y * 28 + x] * 255;
+            ctx.fillStyle = "rgb(" + value + ", " + value + ", " + value + ")";
+            ctx.fillRect(10 * x, 10 * y, 10, 10);
+         }
+      }
+   }
+
+   // Clears the canvas
+   async function clearCanvas() {
+      hideAnswerContainer();
+      document.getElementById("clearButton").style.opacity = "0";
+      document.getElementById("clearButton").style.transform = "scale(0)";
+      hideProgressBar();
+      log(" ");
+
+      document.getElementById("canvas").style.transform = "scale(0.9)";
+      document.getElementById("canvas").style.opacity = "0";
+      await wait(200);
+
+      document.getElementById("canvas").style.transform = "scale(1)";
+      document.getElementById("canvas").style.opacity = "1";
+      pixels = [];
+      for (let i = 0; i < 28 * 28; i++) pixels.push(0);
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw Grid of Random Images
+      if (trainingImages.length > 100) {
+         for (let yy = 0; yy < 280; yy += 28) {
+            for (let xx = 0; xx < 280; xx += 28) {
+               if (xx < 112 || xx > 140 || yy < 84 || yy > 168) {
+                  let index = Math.round(Math.random() * 59999);
+                  let color = Math.random() * 10;
+                  for (let y = 0; y < 28; y++) {
+                     for (let x = 0; x < 28; x++) {
+                        let pixel = 255 * trainingImages[index * 784 + y * 28 + x];
+                        ctx.fillStyle = "rgb(" + (pixel / color) * 0.5 + ", " + (pixel / color) * 1.2 + ", " + (pixel / color) * 1.5 + ")";
+                        ctx.fillRect(xx + x, yy + y, 1, 1);
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   // Centers the Image
+   function centerImage() {
+      let center = { x: 0, y: 0 };
+      let sum = 0;
+      for (let y = 0; y < 28; y++) {
+         for (let x = 0; x < 28; x++) {
+            let ind = y * 28 + x;
+            sum += pixels[ind];
+            center.x += pixels[ind] * x;
+            center.y += pixels[ind] * y;
+         }
+      }
+      center.x /= sum;
+      center.y /= sum;
+      let diff = { x: Math.round(center.x - 14), y: Math.round(center.y - 14) };
+
+      let hPixels = [...pixels];
+      for (let i = 0; i < 28 * 28; i++) {
+         let newIndex = i + diff.x;
+         let newVal = pixels[newIndex] || 0;
+         if (Math.floor(newIndex / 28) != Math.floor(i / 28)) newVal = 0;
+         hPixels[i] = newVal;
+      }
+
+      let vPixels = [...hPixels];
+      for (let i = 0; i < 28 * 28; i++) {
+         newIndex = i + 28 * diff.y;
+         newVal = hPixels[newIndex] || 0;
+         if (Math.floor(newIndex % 28) != Math.floor(i % 28)) newVal = 0;
+         vPixels[i] = newVal;
+      }
+
+      return vPixels;
+   }
+
+   // Progress Bar Controllers
+   function setProgressBar(value, option, id) {
+      let progressBar;
+      if (id == undefined) {
+         document.getElementById("progressContainer").style.display = "inline-block";
+         document.getElementById("progressContainer").style.transform = "scale(1)";
+         document.getElementById("progressContainer").style.opacity = "1";
+         progressBar = document.getElementById("progressBar");
+      } else {
+         progressBar = document.getElementById(id);
+      }
+      progressBar.style.width = value + "%";
+      if (option == 0) {
+         progressBar.style.backgroundColor = "rgb(40, 140, 255)";
+         progressBar.style.boxShadow = "0px 3px 20px rgba(55, 99, 213, 0.3)";
+      }
+      if (option == 1) {
+         let color = "rgb(255, 50, 180)";
+         if (value > 25 && value < 85) color = "rgb(240, 210, 20)";
+         if (value >= 85) color = "rgb(30, 255, 160)";
+         progressBar.style.backgroundImage = "none";
+         progressBar.style.backgroundColor = color;
+         progressBar.style.boxShadow = "none";
+      }
+   }
+   function hideProgressBar() {
+      document.getElementById("progressContainer").style.transform = "scale(0)";
+      document.getElementById("progressContainer").style.opacity = "0";
+      setTimeout(() => {
+         document.getElementById("progressContainer").style.display = "none";
+      }, 300);
+   }
+
+   function hideAnswerContainer() {
+      document.getElementById("answerContainer").style.transform = "scale(0)";
+      document.getElementById("answerContainer").style.opacity = "0";
+      setTimeout(() => {
+         document.getElementById("answerContainer").style.display = "none";
+      }, 300);
+   }
+
+   async function wait(ms) {
+      return new Promise((res) => setTimeout(res, ms));
+   }
+</script>

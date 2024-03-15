@@ -1,0 +1,83 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Data Compression</title>
+  <meta name="description" content="A demonstration of a simple data compression algorithm based on the famous LZ78."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/compression/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <t class="title">LZ78 Compression</t><br><br>
+  <textarea class="foreground textarea" id="text" rows="15" cols="80" placeholder="Text" autofocus></textarea>
+  <br><div class="button" type="button" id="encryptButton" onclick="start();">COMPRESS</div>
+  <br><t class="text" id="output"></t>
+</body>
+
+</html>
+
+
+<script>
+
+// Load default text
+fetch("defaultText.txt")
+.then(res => res.text())
+.then(text => {
+  document.getElementById("text").value = text;
+});
+
+// Called by "Compress" Button
+function start() {
+  let text = document.getElementById("text").value;
+  let res = CompressLZ78(text);
+  let encodedData = res.encodedData;
+  let dictionary = res.dictionary;
+  console.log("Encoded Data:");
+  console.log(encodedData);
+  console.log("");
+  console.log("Dictionary:");
+  console.log(dictionary);
+
+  // Calculate Size of compressed Data
+  if (text.length == 0) return;
+  let originalSize = text.length;
+  let numberOfIndexBits = Math.floor(Math.log2(encodedData.length)+1);
+  let newSize = Math.round((numberOfIndexBits + encodedData.length*numberOfIndexBits + encodedData.length*8)/8);
+  let percentage = Math.round(newSize/originalSize*1000)/10;
+  if (percentage > 100) {
+    document.getElementById("output").innerHTML = "The compression algorithm is not useful when applied to data this short! Please enter text with a greater length.";
+    return;
+  }
+  originalSize = (originalSize > 9999) ? Math.round(originalSize/100)/10 + " kB" : originalSize + " Bytes";
+  newSize = (newSize > 9999) ? Math.round(newSize/100)/10 + " kB" : newSize + " Bytes";
+  document.getElementById("output").innerHTML = `Can be compressed to ${percentage}% of its original size.<br>${originalSize} to ${newSize}`;
+}
+
+// Implementation of the LZ78 Algorithm
+function CompressLZ78(text) {
+  let encodedData = [];
+  let dictionary = [];
+  for (let i = 0; i < text.length; i++) {
+    let searchWord = "";
+    let tableIndex = -1;
+    while (true) {
+      searchWord += text[i];
+      let ind = dictionary.indexOf(searchWord);
+      if (ind == -1 || i == text.length-1) break;
+      tableIndex = ind;
+      i++;
+    }
+    dictionary.push(searchWord);
+    encodedData.push({
+      i: tableIndex,
+      code: searchWord.substr(-1)
+    });
+  }
+  return {
+    "encodedData": encodedData,
+    "dictionary": dictionary
+  };
+}
+</script>

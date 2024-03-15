@@ -1,0 +1,38 @@
+:root {
+  --rayColor: rgb(220, 225, 235);
+}
+
+t {
+  text-align: center;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+body {
+  overflow: hidden;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 2;
+}
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rayColor: rgb(40, 80, 115);
+  }
+}
+
+
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .button:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

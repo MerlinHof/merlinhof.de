@@ -1,0 +1,198 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Ray Casting Demo</title>
+      <meta name="description" content="A demonstration of 2D ray casting used to create a 3D world." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/raycasting/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+   </body>
+
+   <script>
+      // Prepare Canvas
+      let canvas = document.getElementById("canvas");
+      let height = canvas.clientHeight;
+      let width = canvas.clientWidth;
+      let ctx = canvas.getContext("2d");
+      let pixelFactor = window.devicePixelRatio;
+      canvas.setAttribute("height", height * pixelFactor);
+      canvas.setAttribute("width", width * pixelFactor);
+      ctx.scale(pixelFactor, pixelFactor);
+      ctx.lineCap = "round";
+
+      // Global Variables
+      let raySourcePosition = { x: width / 2, y: height - 60 };
+      let rayCount = 200;
+      let fieldOfView = Math.PI / 4;
+      let mouseDown = false;
+      let walls = [];
+
+      let obstacles = [
+         { x: 0, y: 0, width: width, height: height },
+         { x: 0, y: 0, width: 305, height: 305 },
+         { x: width - 450, y: 100, width: 150, height: 50 },
+         { x: width - 300, y: 100, width: 150, height: 100 },
+         { x: width - 300, y: 200, width: 25, height: 150 },
+         { x: width - 300 + 125, y: 200, width: 25, height: 150 },
+         { x: width / 2 - 100, y: 260, width: 140, height: 100 },
+         { x: width / 2 - 150, y: 250, width: 240, height: 10 },
+         { x: width / 2 - 40, y: 150, width: 10, height: 300 },
+      ];
+      if (height > width) {
+         obstacles = [
+            { x: 0, y: 0, width: width, height: height },
+            { x: 0, y: 0, width: 305, height: 305 },
+            { x: width / 2 - 50, y: 300, width: 100, height: 50 },
+            { x: 10, y: 400, width: 100, height: 50 },
+            { x: 50, y: 450, width: 10, height: 100 },
+         ];
+      }
+
+      start();
+      function start() {
+         // Convert Obstacles to walls
+         for (let i = 0; i < obstacles.length; i++) {
+            let ob = obstacles[i];
+            walls.push({ sx: ob.x, sy: ob.y, ex: ob.x + ob.width, ey: ob.y });
+            walls.push({ sx: ob.x, sy: ob.y, ex: ob.x, ey: ob.y + ob.height });
+            walls.push({ sx: ob.x + ob.width, sy: ob.y, ex: ob.x + ob.width, ey: ob.y + ob.height });
+            walls.push({ sx: ob.x + ob.width, sy: ob.y + ob.height, ex: ob.x, ey: ob.y + ob.height });
+         }
+
+         // Calculate slopes & lengths of walls
+         for (let i = 0; i < walls.length; i++) {
+            let l = walls[i];
+            l.slope = (l.sy - l.ey) / (l.sx - l.ex);
+            if (Math.abs(l.slope) == Infinity) l.slope = 9999999;
+            l.squaredLength = Math.pow(l.sx - l.ex, 2) + Math.pow(l.sy - l.ey, 2);
+         }
+
+         update();
+      }
+
+      function update() {
+         ctx.clearRect(0, 0, width, height);
+
+         // Calculate Ray intersection with walls
+         let distances = [];
+         for (let i = 0; i < rayCount; i++) {
+            let rayAngle = i * (fieldOfView / rayCount) - Math.PI / 2 - fieldOfView / 2;
+            let raySlope = Math.tan(rayAngle);
+            if (Math.abs(raySlope) > 99999999) raySlope = 99999999;
+
+            let possibleIntersections = [];
+            for (let j = 0; j < walls.length; j++) {
+               let wall = walls[j];
+               let wallSlope = wall.slope;
+               if (raySlope == wallSlope) raySlope -= 0.00001;
+               let x = (wall.sy - wallSlope * wall.sx - raySourcePosition.y + raySlope * raySourcePosition.x) / (raySlope - wallSlope);
+               let y = raySlope * x + (raySourcePosition.y - raySlope * raySourcePosition.x);
+               let squaredDistFromA = Math.pow(wall.sx - x, 2) + Math.pow(wall.sy - y, 2);
+               let squaredDistFromB = Math.pow(wall.ex - x, 2) + Math.pow(wall.ey - y, 2);
+               if (squaredDistFromA < wall.squaredLength && squaredDistFromB < wall.squaredLength) {
+                  possibleIntersections.push({ x: x, y: y });
+               }
+            }
+
+            let shortestDistance = Infinity;
+            let closestPoint = { x: 0, y: 0 };
+            for (let j = 0; j < possibleIntersections.length; j++) {
+               let p = possibleIntersections[j];
+               let deltaX = raySourcePosition.x - p.x;
+               let deltaY = raySourcePosition.y - p.y;
+               let dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+               if (dist < shortestDistance && deltaY > 0) {
+                  shortestDistance = dist;
+                  closestPoint = { x: p.x, y: p.y };
+               }
+            }
+
+            // Draw Rays
+            distances.push(shortestDistance);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--rayColor");
+            ctx.beginPath();
+            ctx.moveTo(raySourcePosition.x, raySourcePosition.y);
+            ctx.lineTo(closestPoint.x, closestPoint.y);
+            ctx.stroke();
+
+            // Draw Surface Dots
+            ctx.fillStyle = "rgb(180, 220, 255)";
+            ctx.beginPath();
+            ctx.arc(closestPoint.x, closestPoint.y, 1.5, 0, 2 * Math.PI);
+            ctx.fill();
+         }
+
+         // Draw obstacles
+         ctx.fillStyle = "rgb(80, 170, 255)";
+         for (let i = 0; i < obstacles.length; i++) {
+            let o = obstacles[i];
+            if (i != 0) ctx.fillRect(o.x, o.y, o.width, o.height);
+         }
+
+         // Draw 3D View
+         for (let i = 0; i < 150; i++) {
+            ctx.fillStyle = "rgb(" + (10 + i) + ", " + (20 + i) + ", " + (30 + i) + ")";
+            ctx.fillRect(0, 150 - (i + 1), 300, 1);
+            ctx.fillRect(0, 150 + i, 300, 1);
+         }
+         for (let i = 0; i < distances.length; i++) {
+            let dist = distances[i] / 3;
+            let lineHeight = 300 - dist > 0 ? 300 - dist : 0;
+            ctx.fillStyle = "rgb(" + (290 - dist) + ", " + (300 - dist) + ", " + (310 - dist) + ")";
+            ctx.fillRect((i * 300) / distances.length, dist / 2, 300 / distances.length, lineHeight);
+         }
+
+         // Draw Light Source
+         ctx.fillStyle = "rgb(255, 200, 0)";
+         ctx.beginPath();
+         ctx.arc(raySourcePosition.x, raySourcePosition.y, 10, 0, 2 * Math.PI);
+         ctx.fill();
+      }
+
+      // Mouse / Touch Events
+      document.body.addEventListener("mousedown", (event) => {
+         mouseDown = true;
+      });
+      document.body.addEventListener("mouseup", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("mousemove", (event) => {
+         inputMoved(event);
+      });
+
+      document.body.addEventListener("touchstart", (event) => {
+         mouseDown = true;
+      });
+      document.body.addEventListener("touchend", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("touchcancel", (event) => {
+         mouseDown = false;
+      });
+      document.body.addEventListener("touchmove", (event) => {
+         inputMoved(event);
+      });
+
+      function inputMoved(event) {
+         let position = {};
+         if (event.type == "touchmove") {
+            var evt = typeof event.originalEvent === "undefined" ? event : event.originalEvent;
+            var touch = evt.touches[0] || evt.changedTouches[0];
+            position = { x: touch.pageX, y: touch.pageY };
+         } else if (event.type == "mousedown" || event.type == "mousemove") {
+            position = { x: event.clientX, y: event.clientY };
+         }
+
+         if (mouseDown) {
+            raySourcePosition = { x: position.x, y: position.y };
+            update();
+         }
+      }
+   </script>
+</html>

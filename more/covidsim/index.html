@@ -1,0 +1,37 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/more/covidsim/">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <t class="title">Covid-19 Simulation</t><br>
+  <t class="text">
+    Eine Simulation der Ausbreitung einer Pandemie in C. Läuft aktuell nur auf einem Raspberry Pi 3B+ oder älter,
+    der Pi 4 wird aufgrund des neuen Grafiktreibers noch nicht unterstützt. Aufgrund der tiefen Integration ins System
+    durch die direkte Ansprechung des Framebuffers ist der Raspberry Pi der einzige Computer, der dieses Programm
+    ausführen kann.
+  </t><br>
+  <img class="img" src="preview.jpg"><br>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/SHNEdkObHIk?controls=0;&autoplay=1;&mute=1;&loop=1" frameborder="0"></iframe>
+  <t class="text">
+    Es werden die täglichen Begenungen mit anderen Personen und die Beschränkungen durch verschiedene Lockdowns simuliert,
+    um eine möglichst realitätsnahe Kurve zu generieren. Der Code für die Generierung von Textzeichen im Framebuffer und
+    das Zeichnen von Formen wurde passend zur Anwendung geschrieben und muss bei der Kompilierung mit eingebunden
+    werden.
+  </t><br>
+  <button class="button" onclick="download();">HERUNTERLADEN</button>
+
+</body>
+
+</html>
+
+<script>
+
+function download() {
+  window.location.href = "linkToFile";
+}
+
+</script>

@@ -1,0 +1,70 @@
+body {
+  padding: 0px;
+}
+
+#canvas {
+  width:100%;
+  height:100%;
+  touch-action: none;
+}
+
+.reload {
+  display: none;
+  left: 50%;
+  width: 100px;
+  margin-left: -50px;
+  height: 100px;
+  position: fixed;
+  bottom: 50%;
+  z-index: 100px;
+  background-color: rgb(35, 45, 60);
+  border-radius: 200px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.reload:hover {
+  transform: scale(1.4, 1.4);
+}
+
+.reloadimg {
+  width: 50;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.scoreholder {
+  display: none;
+  color: white;
+  width: 100%;
+  position: fixed;
+  bottom: 80%;
+  z-index: 200px;
+  text-align: center;
+}
+
+.score {
+  font-family: boldest;
+  font-size: 40px;
+  color: #ffffff;
+}
+
+/* Light mode*/
+@media (prefers-color-scheme: light) {
+  .reload {
+    background-color: #eceff1;
+  }
+  .score {
+    color: #000000;
+  }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .reload:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

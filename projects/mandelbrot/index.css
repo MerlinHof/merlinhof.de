@@ -1,0 +1,34 @@
+t {
+  text-align: center;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+body {
+  padding: 0px;
+  overflow: hidden;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+#splashContainer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#splashTitle {
+  font-size: 42px;
+  margin-bottom: 30px;
+  font-family: boldest;
+}

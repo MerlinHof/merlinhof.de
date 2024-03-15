@@ -1,0 +1,170 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/subleq/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="emulator.css?v=18" />
+   </head>
+
+   <body>
+      <t class="title">Subleq Emulator</t><br />
+      <textarea class="foreground textarea" id="textarea" rows="15" cols="80" spellcheck="false" placeholder="" autofocus></textarea><br />
+
+      <div id="settingsContainer">
+         <div class="settingsElement">
+            <t class="text">Freq</t>
+            <input type="text" class="foreground textarea" id="inputclock" spellcheck="false" placeholder="" value="max" />
+         </div>
+         <div class="settingsElement">
+            <t class="text">Base</t>
+            <input type="text" class="foreground textarea" id="inputbase" spellcheck="false" placeholder="" value="16" />
+         </div>
+      </div>
+
+      <br />
+      <div class="button" type="button" id="startButton" onclick="startButtonClicked();">RUN</div>
+      <br />
+      <br />
+      <div id="outputContainer"><t id="output"></t></div>
+   </body>
+</html>
+
+<script>
+   // Variables
+   let isRunning = false;
+   let interval;
+
+   // Set up ram cells per row
+   document.body.innerHTML += '<div id="widthTester" style="width: 100%; height: 0px;"></div>';
+   let width = document.getElementById("widthTester").offsetWidth;
+   let ramCellsPerRow = 12;
+   let widthPerCell = 58;
+   if (width < (ramCellsPerRow + 1) * widthPerCell) {
+      ramCellsPerRow = Math.floor(width / widthPerCell);
+   }
+
+   // Subleq OSIC CPU
+   class Computer {
+      constructor(ramSize) {
+         this.iar = 0;
+         this.ram = [];
+         for (let i = 0; i < ramSize; i++) {
+            this.ram.push(0);
+         }
+      }
+
+      cycle() {
+         let a = this.ram[this.iar];
+         this.iar++;
+         let b = this.ram[this.iar];
+         this.iar++;
+         let c = this.ram[this.iar];
+         this.iar++;
+
+         this.ram[b] = this.ram[b] - this.ram[a];
+         if (this.ram[b] <= 0) {
+            this.iar = c;
+         }
+      }
+   }
+
+   function startButtonClicked() {
+      if (isRunning) {
+         document.getElementById("startButton").innerHTML = "RUN";
+         isRunning = false;
+         clearInterval(interval);
+      } else {
+         document.getElementById("startButton").innerHTML = "STOP";
+         isRunning = true;
+         run();
+      }
+   }
+
+   function run() {
+      document.getElementById("settingsContainer").style.display = "none";
+      document.getElementById("textarea").style.display = "none";
+      let asm = document.getElementById("textarea").value.trim();
+      document.getElementById("output").innerHTML = "";
+
+      let ramSize = asm.split(" ").length + 200;
+      let clock = document.getElementById("inputclock").value.trim();
+      let base = document.getElementById("inputbase").value.trim();
+
+      let delay = 0;
+      if (clock.toLowerCase() != "max") {
+         delay = 1000 / parseInt(clock);
+      }
+      if (delay < 5) {
+         delay = 5;
+      }
+
+      let blocks = [];
+      asm = asm.replaceAll("\n", " ");
+      blocks = asm.split(" ");
+
+      // Copy program to ram
+      let computer = new Computer(ramSize);
+      for (let i = 0; i < blocks.length; i++) {
+         computer.ram[i] = parseInt(blocks[i]);
+      }
+
+      let finalString = '<div class="ramRow">';
+      for (let i = 0; i < computer.ram.length; i++) {
+         finalString += '<t class="ramCell" id="cell' + i + '">' + computer.ram[i].toString(base).toUpperCase() + "</t>";
+         if ((i + 1) % ramCellsPerRow == 0) {
+            finalString += '</div><br><div class="ramRow">';
+         }
+      }
+      document.getElementById("output").innerHTML = finalString;
+      for (let i = 0; i < computer.ram.length; i++) {
+         if (computer.ram[i] == 0) {
+            document.getElementById("cell" + i).style.opacity = "0.2";
+         }
+      }
+
+      let activeCells = [];
+      clearInterval(interval);
+      interval = setInterval(() => {
+         computer.cycle();
+
+         for (let i = 0; i < activeCells.length; i++) {
+            let element = document.getElementById("cell" + activeCells[i]);
+            element.style.color = "var(--textColor)";
+            element.style.backgroundColor = "var(--cellColor)";
+            let val = computer.ram[activeCells[i]].toString(base).toUpperCase();
+            element.innerText = val;
+            if (val == 0) {
+               element.style.opacity = "0.2";
+            } else {
+               element.style.opacity = "1.0";
+            }
+         }
+         activeCells = [];
+         activeCells = [computer.iar, computer.iar + 1, computer.iar + 2, computer.ram[computer.iar], computer.ram[computer.iar + 1], computer.ram[computer.iar + 2]];
+
+         for (let i = 0; i < activeCells.length; i++) {
+            let element = document.getElementById("cell" + activeCells[i]);
+            let val = computer.ram[activeCells[i]].toString(base).toUpperCase();
+            if (val == 0) {
+               element.style.opacity = "0.2";
+            } else {
+               element.style.opacity = "1.0";
+            }
+            if (i < 3) {
+               element.style.color = "var(--highlightTextColor)";
+               element.style.backgroundColor = "#2196f3";
+               element.innerText = val;
+            } else {
+               element.style.color = "var(--highlightTextColor)";
+               element.style.backgroundColor = "#ffa500";
+               element.innerText = val;
+            }
+         }
+      }, delay);
+   }
+
+   String.prototype.replaceAll = function (search, replacement) {
+      return this.split(search).join(replacement);
+   };
+</script>

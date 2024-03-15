@@ -1,0 +1,314 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Elliptic Curve Cryptography Demo</title>
+      <meta name="description" content="A modern demonstration of one of the best asymmetric encryption methods ever created - Elliptic Curve Cryptography." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/ecc/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+      <script src="security.js"></script>
+   </head>
+
+   <body>
+      <div class="vdiv"></div>
+
+      <div id="containerAlice">
+         <t class="title" id="leftname">Alice</t><br />
+         <t class="subtitle">Private Key</t><br />
+         <t class="generateText" id="privateKeyViewAlice">GENERATE</t><br />
+         <t class="subtitle">Public Key</t><br />
+         <t class="generateText" id="publicKeyViewAlice">GENERATE</t><br />
+         <t class="subtitle">Shared Key</t><br />
+         <t class="generateText" id="sharedKeyViewAlice">GENERATE</t><br />
+         <t class="subtitle">Hashed Key</t><br />
+         <t class="generateText" id="hashedKeyViewAlice">GENERATE</t><br />
+         <input type="text" class="foreground textarea" id="inputAlice" spellcheck="false" oninput="inputChangedAlice();" placeholder="Message" /><br />
+         <t class="subtitle">Ciphertext</t><br />
+         <t class="generateText" id="ciphertextViewAlice">-----</t><br />
+         <div class="button" type="button" onclick="sendToBob();">SEND</div>
+      </div>
+
+      <div id="containerBob">
+         <t class="title" id="leftname">Bob</t><br />
+         <t class="subtitle">Private Key</t><br />
+         <t class="generateText" id="privateKeyViewBob">GENERATE</t><br />
+         <t class="subtitle">Public Key</t><br />
+         <t class="generateText" id="publicKeyViewBob">GENERATE</t><br />
+         <t class="subtitle">Shared Key</t><br />
+         <t class="generateText" id="sharedKeyViewBob">GENERATE</t><br />
+         <t class="subtitle">Hashed Key</t><br />
+         <t class="generateText" id="hashedKeyViewBob">GENERATE</t><br />
+         <input type="text" class="foreground textarea" id="inputBob" spellcheck="false" oninput="inputChangedBob();" placeholder="Message" /><br />
+         <t class="subtitle">Ciphertext</t><br />
+         <t class="generateText" id="ciphertextViewBob">-----</t><br />
+         <div class="button" type="button" onclick="sendToAlice();">SEND</div>
+      </div>
+   </body>
+</html>
+
+<script>
+   // ----------------------------------------------------------------------------------------
+   // Here the code starts
+   // ----------------------------------------------------------------------------------------
+
+   // Struct
+   class Point {
+      constructor(x, y) {
+         this.x = x;
+         this.y = y;
+      }
+   }
+   document.getElementById("privateKeyViewAlice").classList.add("generateButton");
+
+   // Click listeners
+   var privateKeyViewAlice = document.getElementById("privateKeyViewAlice");
+   privateKeyViewAlice.addEventListener(
+      "click",
+      () => {
+         generatePrivateKeyForAlice();
+      },
+      false,
+   );
+   var publicKeyViewAlice = document.getElementById("publicKeyViewAlice");
+   publicKeyViewAlice.addEventListener(
+      "click",
+      () => {
+         generatePublicKeyForAlice();
+      },
+      false,
+   );
+   var sharedKeyViewAlice = document.getElementById("sharedKeyViewAlice");
+   sharedKeyViewAlice.addEventListener(
+      "click",
+      () => {
+         generateSharedKeyForAlice();
+      },
+      false,
+   );
+   var hashedKeyViewAlice = document.getElementById("hashedKeyViewAlice");
+   hashedKeyViewAlice.addEventListener(
+      "click",
+      () => {
+         generateHashedKeyForAlice();
+      },
+      false,
+   );
+   var privateKeyViewBob = document.getElementById("privateKeyViewBob");
+   privateKeyViewBob.addEventListener(
+      "click",
+      () => {
+         generatePrivateKeyForBob();
+      },
+      false,
+   );
+   var publicKeyViewBob = document.getElementById("publicKeyViewBob");
+   publicKeyViewBob.addEventListener(
+      "click",
+      () => {
+         generatePublicKeyForBob();
+      },
+      false,
+   );
+   var sharedKeyViewBob = document.getElementById("sharedKeyViewBob");
+   sharedKeyViewBob.addEventListener(
+      "click",
+      () => {
+         generateSharedKeyForBob();
+      },
+      false,
+   );
+   var hashedKeyViewBob = document.getElementById("hashedKeyViewBob");
+   hashedKeyViewBob.addEventListener(
+      "click",
+      () => {
+         generateHashedKeyForBob();
+      },
+      false,
+   );
+
+   // ----------------------------------------------------------------------------------------
+   // Here the general program logic starts
+   // ----------------------------------------------------------------------------------------
+
+   // Variables
+   let privateKeyAlice;
+   let publicKeyAlice;
+   let sharedKeyAlice;
+   let hashedKeyAlice;
+   let ciphertextAlice;
+   let privateKeyBob;
+   let publicKeyBob;
+   let sharedKeyBob;
+   let hashedKeyBob;
+   let ciphertextBob;
+
+   // Generate Private Keys
+   function generatePrivateKeyForAlice() {
+      privateKeyAlice = randomBigInt(fieldSize);
+      privateKeyViewAlice.innerHTML = privateKeyAlice;
+      document.getElementById("privateKeyViewAlice").classList.remove("generateButton");
+      document.getElementById("privateKeyViewBob").classList.add("generateButton");
+   }
+   function generatePrivateKeyForBob() {
+      privateKeyBob = randomBigInt(fieldSize);
+      privateKeyViewBob.innerHTML = privateKeyBob;
+      document.getElementById("privateKeyViewBob").classList.remove("generateButton");
+      document.getElementById("publicKeyViewAlice").classList.add("generateButton");
+   }
+
+   // Generate Public Keys
+   function generatePublicKeyForAlice() {
+      publicKeyAlice = multiplyPoint(basePoint, privateKeyAlice);
+      publicKeyViewAlice.innerHTML = "x: " + publicKeyAlice.x + "<br>y: " + publicKeyAlice.y;
+      document.getElementById("publicKeyViewAlice").classList.remove("generateButton");
+      document.getElementById("publicKeyViewBob").classList.add("generateButton");
+   }
+   function generatePublicKeyForBob() {
+      publicKeyBob = multiplyPoint(basePoint, privateKeyBob);
+      publicKeyViewBob.innerHTML = "x: " + publicKeyBob.x + "<br>y: " + publicKeyBob.y;
+      document.getElementById("publicKeyViewBob").classList.remove("generateButton");
+      document.getElementById("sharedKeyViewAlice").classList.add("generateButton");
+   }
+
+   // Generate Shared Keys
+   function generateSharedKeyForAlice() {
+      sharedKeyAlice = multiplyPoint(publicKeyBob, privateKeyAlice);
+      sharedKeyViewAlice.innerHTML = "x: " + sharedKeyAlice.x + "<br>y: " + sharedKeyAlice.y;
+      document.getElementById("sharedKeyViewAlice").classList.remove("generateButton");
+      document.getElementById("sharedKeyViewBob").classList.add("generateButton");
+   }
+   function generateSharedKeyForBob() {
+      sharedKeyBob = multiplyPoint(publicKeyAlice, privateKeyBob);
+      sharedKeyViewBob.innerHTML = "x: " + sharedKeyBob.x + "<br>y: " + sharedKeyBob.y;
+      document.getElementById("sharedKeyViewBob").classList.remove("generateButton");
+      document.getElementById("hashedKeyViewAlice").classList.add("generateButton");
+   }
+
+   // Generate Hashed Keys
+   function generateHashedKeyForAlice() {
+      hashedKeyAlice = hash(sharedKeyViewAlice.innerHTML);
+      hashedKeyViewAlice.innerHTML = hashedKeyAlice;
+      document.getElementById("hashedKeyViewAlice").classList.remove("generateButton");
+      document.getElementById("hashedKeyViewBob").classList.add("generateButton");
+   }
+   function generateHashedKeyForBob() {
+      hashedKeyBob = hash(sharedKeyViewBob.innerHTML);
+      hashedKeyViewBob.innerHTML = hashedKeyBob;
+      document.getElementById("hashedKeyViewBob").classList.remove("generateButton");
+   }
+
+   // Input changed
+   function inputChangedAlice() {
+      ciphertextAlice = encrypt(document.getElementById("inputAlice").value, hashedKeyAlice);
+      document.getElementById("ciphertextViewAlice").innerHTML = ciphertextAlice;
+   }
+   function inputChangedBob() {
+      ciphertextBob = encrypt(document.getElementById("inputBob").value, hashedKeyBob);
+      document.getElementById("ciphertextViewBob").innerHTML = ciphertextBob;
+   }
+
+   // Send Buttons
+   function sendToBob() {
+      document.getElementById("inputAlice").value = "";
+      document.getElementById("inputBob").value = decrypt(ciphertextAlice, hashedKeyBob);
+      ciphertextAlice = "";
+      ciphertextViewAlice.innerHTML = "-----";
+   }
+   function sendToAlice() {
+      document.getElementById("inputBob").value = "";
+      document.getElementById("inputAlice").value = decrypt(ciphertextBob, hashedKeyAlice);
+      ciphertextBob = "";
+      ciphertextViewBob.innerHTML = "-----";
+   }
+
+   // ----------------------------------------------------------------------------------------
+   // Here are the elliptic curve calculations
+   // ----------------------------------------------------------------------------------------
+
+   // Parameters (Curve secp256k1)
+   let a = 0n;
+   let b = 7n;
+   let fieldSize = 115792089237316195423570985008687907853269984665640564039457584007908834671663n;
+   let basePoint = new Point(55066263022277343669578718895168534326250603453777594175500187360389116729240n, 32670510020758816978083085130507043184471273380659243275938904335757337482424n);
+   let randomSeedValue = BigInt(modulo(Date.now(), 1000) * 10000000000000000000000000000000000000);
+
+   // Returns the modular inverse of a given number and prime modulo
+   function modularInverse(number, mod) {
+      let numerator = 1n;
+      let denominator = number;
+      for (let i = 0; i < 100000; i++) {
+         let cm = 1n + mod / denominator;
+         denominator = bigIntModulo(denominator * cm, mod);
+         numerator = bigIntModulo(numerator * cm, mod);
+         if (bigIntModulo(numerator, denominator) == 0) {
+            return numerator / denominator;
+         }
+      }
+   }
+
+   // Adds two points on the curve over the finite field
+   function addPoints(p1, p2) {
+      let slopeNumerator = 0n;
+      let slopeDenominator = 0n;
+
+      if (p1 == p2) {
+         slopeNumerator = bigIntModulo(3n * p1.x * p1.x + a, fieldSize);
+         slopeDenominator = bigIntModulo(2n * p1.y, fieldSize);
+      } else {
+         slopeNumerator = bigIntModulo(p1.y - p2.y, fieldSize);
+         slopeDenominator = bigIntModulo(p1.x - p2.x, fieldSize);
+      }
+      let inverse = modularInverse(slopeDenominator, fieldSize);
+      let slope = bigIntModulo(slopeNumerator * inverse, fieldSize);
+
+      let sumX = bigIntModulo(slope * slope - p1.x - p2.x, fieldSize);
+      let sumY = bigIntModulo(-p1.y - slope * (sumX - p1.x), fieldSize);
+
+      return new Point(sumX, sumY);
+   }
+
+   // Multipies a point by a factor over the finite field
+   function multiplyPoint(point, factor) {
+      let powerList = [point];
+      let powerListPlain = [1n];
+      let counter = 1;
+      while (2 * counter <= factor) {
+         let prevPoint = powerList[powerList.length - 1];
+         let sum = addPoints(prevPoint, prevPoint);
+         powerList.push(sum);
+         powerListPlain.push(2n * powerListPlain[powerListPlain.length - 1]);
+         counter += counter;
+      }
+
+      let resultPoint = new Point(undefined, undefined);
+      for (let i = 0; i < powerList.length; i++) {
+         let index = powerList.length - i - 1;
+         let power = powerListPlain[index];
+         if (power <= factor) {
+            factor -= power;
+            if (resultPoint.x == undefined) {
+               resultPoint = powerList[index];
+            } else {
+               resultPoint = addPoints(resultPoint, powerList[index]);
+            }
+         }
+      }
+      return resultPoint;
+   }
+
+   // Returns the modulo of BigInt numbers
+   function bigIntModulo(a, c) {
+      let md = a - (a / c) * c;
+      if (md < 0) {
+         md = md + c;
+      }
+      return md;
+   }
+
+   // Returns a random BigInt number
+   function randomBigInt(max) {
+      randomSeedValue = bigIntModulo(589394702688568033093010239847805345034596723904579688908380493470297n * randomSeedValue + 5774737929001408397n, 97349842n * fieldSize + 11n);
+      return bigIntModulo(randomSeedValue, max);
+   }
+</script>

@@ -1,0 +1,148 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>CleanCode Introduction</title>
+  <meta name="description" content="Let's introduce CleanCode - the most advanced Programming Language of all time"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/cleancode/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body onscroll="scrollChanged()">
+  <div class="container" id="welcomeContainer" onclick="window.location.href='editor'">
+    <t class="title" id="mainTitle">CleanCode</t><br>
+  </div>
+
+  <div class="container" id="featureContainer">
+    <t class="title">The Future of Programming</t>
+  </div>
+
+  <div class="container">
+    <t class="title">Single Codebase Compiles to</t>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/browser.png">
+      WebApp
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/ios.png">
+      iOS
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/ios.png">
+      iPadOS
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/macos.png">
+      macOS
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/windows.png">
+      Windows
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/android.png">
+      Android
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/linux.png">
+      Linux
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/raspberrypi.png">
+      Raspberry Pi
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/disc.png">
+      Bootable OS
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/cpu.png">
+      Microcontroller
+    </div>
+    <div class="compilerOutputOptionContainer">
+      <img class="compilerOutputOptionImage" src="images/terminal.png">
+      Terminal
+    </div>
+  </div>
+
+  <div class="container" id="syntaxContainer">
+  </div>
+
+</body>
+</html>
+
+<script src="highlighting.js"></script>
+<script defer>
+
+// Global Variables
+let screenHeight = window.innerHeight;
+let screenWidth = window.innerWidth;
+let mainTitle = document.getElementById("mainTitle");
+let featureContainer = document.getElementById("featureContainer");
+let features = ["High Level", "Ultra Clean", "Consistent Syntax", "Intelligent and Logical", "Beautiful", "Lightweight", "Incredibly Fast", "Concise", "Mathematical Foundation", "Multithreaded", "Useful Compiler Errors", "Extremely Powerful", "Easy to grasp", "Native Executables", "Implicitly Typed", "Deeply integrated UI", "Multiple Inheritance", "Object Oriented", "Abstract Hardware Interfaces", "Simple Error Handling"];
+let featureProperties = [];
+let highlighter = new CodeHighlighter();
+
+setTimeout(() => {
+  createFeatures();
+  createCode();
+}, 100);
+
+// Creates Texts of features and stores their properties
+function createFeatures() {
+  features.shuffle()
+  for (let i = 0; i < features.length; i++) {
+    let width = screenWidth/1.5;
+    let pos = Math.round((width/2)-Math.random()*width);
+    let opacity = 0.3+Math.random()*0.5;
+    let speed = 0.3+Math.random()*1.7;
+    featureProperties.push({pos: pos, speed: speed});
+    featureContainer.innerHTML += "<t class='featureText' id='featureText" + i + "' style='left: " + pos + "px; opacity: " + opacity + "'>" + features[i] + "</t>";
+  }
+}
+
+async function createCode() {
+  let snippets = [];
+  await fetch("syntax.json")
+    .then(res => res.json())
+    .then(res => snippets = res);
+
+  for (snippet of snippets) {
+    let container = `<t class="title syntaxTitle">${snippet.title}</t>
+      <t class="syntaxDescription">${snippet.description}</t>
+      <div class="codeContainer" id="variableDeclaration">${highlighter.highlightCode(snippet.code)}</div>`;
+    document.getElementById("syntaxContainer").innerHTML += container;
+  }
+  console.log(snippets);
+}
+
+// Scroll Effects
+function scrollChanged() {
+  let scrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+  if (scrollY <= screenHeight) {
+    mainTitle.style.transform = "scale(" + (1-(scrollY/screenHeight)) + ")";
+    mainTitle.style.opacity = 1-(scrollY/screenHeight);
+    mainTitle.style.marginTop = -scrollY/2;
+  }
+  if (scrollY <= 3*screenHeight) {
+    for (let i = 0; i < features.length; i++) {
+      let el = document.getElementById("featureText" + i);
+      let dx = (featureProperties[i].pos>0) ? -scrollY/5 : scrollY/5;
+      el.style.left = featureProperties[i].pos + featureProperties[i].speed*dx + "px";
+    }
+  }
+}
+
+
+Array.prototype.shuffle = function() {
+  for (let i = 0; i < this.length; i++) {
+    let ind = Math.floor(Math.random()*this.length);
+    let tmp = this[i];
+    this[i] = this[ind];
+    this[ind] = tmp;
+  }
+}
+
+</script>

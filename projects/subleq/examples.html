@@ -1,0 +1,232 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/subleq/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="examples.css?v=18" />
+   </head>
+
+   <body>
+      <t class="title">Hello World</t><br />
+      <t class="text"
+         >This program copies the message defined in the code to another address. In the first line of the program the computer jumps to the label 'start' to avoid executing the string defined below
+         as instructions. The extra zero after the message is later used to determine the end of the string. Under the label 'start' the start address of the message and the destination address, which
+         in this case is the base address of the heap, are stored in the two registers A and B. Next, the instructions under the label 'loop' are executed. At first, the data to which register A
+         points (pointer, therefore [...]), which is the current character, is moved to the address to which register B points to. Then A and B are incremented by one to move the pointers to the next
+         character of the message and to the next output position. Now it is checked if the current character is zero to determine if the message has been completely copied. If that's the case, the
+         computer jumps to the label 'end' which halts the program. Otherwise the computer jumps back to 'loop' and starts all over again with the next character.</t
+      ><br />
+      <div class="foreground example_container">
+         <t class="example_code" id="example0"></t>
+      </div>
+
+      <br /><br /><br /><t class="title">Prime Numbers</t><br />
+      <t class="text"
+         >This program calculates all the prime numbers from zero up to the defined maximum and stores them in the output address, which in this case is the heap. To understand this program, one needs
+         to know that any non-prime number is divisible by a smaller prime number. So knowing the second prime number 3 (for convenience) we can calculate all the following prime numbers by checking
+         if the current number is divisible by any prime number smaller than the number we are checking. This program has the following structure: Every odd number from 3 on is checked if it is prime
+         by calculating the modulo of the number and every already calculated prime number. If one of those moduli is equal to zero, the number is evenly divisible by a prime number and can therefore
+         not be a prime number. In that case the loop can be broken and the program moves to the next number. But if the program reached the last prime number without any modulo being zero, the number
+         has to be a prime and it is moved to the output.</t
+      ><br />
+      <div class="foreground example_container">
+         <t class="example_code" id="example1"></t>
+      </div>
+
+      <br /><br /><br />
+      <t class="title">Fibonacci Sequence</t><br />
+      <t class="text"
+         >This program calculates all the elements of the fibonacci sequence up to the defined maximum. The fibonacci sequence starts with two ones with the next element always being the sum of the
+         previous two elements. So it goes like: 1, 1, 2, 3, 5, 8, 13, 21, ... An interesting fact is that the bigger the numbers are getting, the closer the ratio of two neighbouring elements
+         approaches the golden ratio. If you run this program after assembling it to machine language in the subleq emulator, make sure to set 'Base' to 10 to see the result in decimal. In the first
+         line of the program the assembler instruction defines the maximum of 1000. Then the macro 'addt' for adding two numbers and storing the result at a different address is defined. While this is
+         not absolutely neccessary, it makes the code more readable and easier to expand. The main program starts by moving the base of the output, in this case the heap, to register A. The first two
+         elements of the fibonacci sequence, 1 and 1, are stored in registers B and C. The next four instructions manually copy them to the output. Under the label 'loopstart' registers B and C are
+         added with the result being stored in register D. Next it is checked if the result is larger or equal to the defined maximum and if yes, it jumps to the label 'end' to halt the program. Or it
+         continues if the result is still less than the maximum. The next two instructions set the new B and C by setting B to C and C to the new result D. Then the result is copied to the output and
+         the loop starts all over again.</t
+      ><br />
+      <div class="foreground example_container">
+         <t class="example_code" id="example2"> </t>
+      </div>
+   </body>
+</html>
+
+<script>
+   let examples = [
+      `JMP start
+
+msg:
+DB "Hello World"
+DB 0
+
+start:
+MOV A, msg
+MOV B, HeapBase
+
+loop:
+MOV [B], [A]
+INC A
+INC B
+BLE [A], 0, end
+JMP loop
+
+end:
+HLT`,
+
+      `#define max 50
+#define output_addr HeapBase
+
+mov a, 3
+mov b, output_addr
+jmp loop
+
+loop:
+bge a, max, done
+mov d, 1
+call check
+beq d, 1, print
+back:
+add a, 2
+jmp loop
+
+print:
+mov [b], a
+inc b
+jmp back
+
+check:
+mov c, output_addr
+innerloop:
+ble [c], 0, finish
+mov e, a
+mod e, [c]
+beq e, 0, noprime
+inc c
+jmp innerloop
+noprime:
+clr d
+finish:
+ret
+
+done:
+hlt`,
+
+      `#define max 1000
+
+#macro addt target, val_a, val_b
+  mov target, val_a
+  add target, val_b
+#end
+
+mov a, HeapBase
+mov b, 1
+mov c, 1
+mov [a], 1
+inc a
+mov [a], 1
+inc a
+
+loopstart:
+addt d, b, c
+bge d, max, stop
+mov b, c
+mov c, d
+mov [a], d
+inc a
+jmp loopstart
+
+stop:
+hlt`,
+   ];
+
+   for (let i = 0; i < examples.length; i++) {
+      let code = examples[i].toLowerCase();
+
+      // Numbers
+      for (let j = 0; j <= 9; j++) {
+         code = code.replaceAll(j, "<font color='replaceWithNumberColor'>" + j + "</font>");
+      }
+      code = code.replaceAll("replaceWithNumberColor", "#272AD0");
+
+      // Registers
+      let registers = ["a", "b", "c", "d", "e", "f", "g"];
+      for (let j = 0; j < registers.length; j++) {
+         code = code.replaceAll(" " + registers[j] + ",", " <font color='#C03E2A'>" + registers[j] + "</font>,");
+         code = code.replaceAll("[" + registers[j], "[<font color='#C03E2A'>" + registers[j] + "</font>");
+         code = code.replaceAll(" " + registers[j] + "\n", " <font color='#C03E2A'>" + registers[j] + "\n</font>");
+      }
+
+      // Keywords
+      let keywords = [
+         "jmp ",
+         "db ",
+         "mov ",
+         "add ",
+         "sub ",
+         "inc ",
+         "dec ",
+         "hlt",
+         "ble ",
+         "bge ",
+         "blt ",
+         "bgt ",
+         "beq ",
+         "bnq ",
+         "call ",
+         "mod ",
+         "ret",
+         "push ",
+         "pop ",
+         "mul ",
+         "div ",
+         "clr ",
+         "heapbase",
+         "stackbase",
+      ];
+      for (let j = 0; j < keywords.length; j++) {
+         code = code.replaceAll(keywords[j], "<font color='#A0449F'>" + keywords[j] + "</font>");
+      }
+
+      // Labels, Strings, Defines, Macros
+      code = code.replaceAll("\n", "<br>");
+      let lines = code.split("<br>");
+      for (let j = 0; j < lines.length; j++) {
+         if (lines[j].substr(-1) == ":") {
+            let label = lines[j].substring(0, lines[j].length - 1);
+            lines[j] = "<font color='#4081B0'>" + lines[j].substring(0, lines[j].length - 1) + "</font>:";
+            for (let k = 0; k < lines.length; k++) {
+               lines[k] = lines[k].replaceAll(label, "<font color='#4081B0'>" + label + "</font>");
+            }
+         }
+         if (lines[j].includes('"')) {
+            let si = lines[j].indexOf('"') + 1;
+            let ei = lines[j].lastIndexOf('"');
+            lines[j] = lines[j].substring(0, si) + "<font color='#6CB765'>" + lines[j].substring(si, ei) + "</font>" + lines[j].substring(ei, lines[j].length);
+         }
+         if (lines[j].substring(0, 8) == "#define ") {
+            let val = lines[j].substring(8, lines[j].length);
+            val = val.substring(0, val.indexOf(" ")).trim();
+            lines[j] = "<font color='#41792A'>#define</font>" + lines[j].substring(7, lines[j].length);
+            for (let k = 0; k < lines.length; k++) {
+               lines[k] = lines[k].replaceAll(val, "<font color='#C03E2A'>" + val + "</font>");
+            }
+         }
+         if (lines[j].substring(0, 7) == "#macro ") {
+            let val = lines[j].substring(7, lines[j].length);
+            val = val.substring(0, val.indexOf(" ")).trim();
+            lines[j] = "<font color='#41792A'>#macro </font>" + lines[j].substring(7, lines[j].length);
+            for (let k = 0; k < lines.length; k++) {
+               lines[k] = lines[k].replaceAll(val, "<font color='#A0449F'>" + val + "</font>");
+            }
+         }
+         if (lines[j] == "#end") {
+            lines[j] = "<font color='#41792A'>#end</font>";
+         }
+      }
+
+      code = lines.join("<br>");
+      document.getElementById("example" + i).innerHTML = "<pre>" + code + "</pre>";
+   }
+</script>

@@ -1,0 +1,111 @@
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Museum Of Babel</title>
+  <meta name="description" content="The Museum of Babel contains the answers to every Question you have in life and anyone ever has or will have or won't have. It contains everything."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/museumofbabel/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <div id="infoContainer">
+    <t class="title" style="margin-top: 20vh;">The Museum Of Babel</t>
+    <t class="text">Welcome to the digital Museum of Babel. It's a museum filled with images. In fact, it contains every single image in existance and every image that has ever existed or will ever exist. It contains photos of you when you were born, it contains photos of you when you die, it contains photos of every person who will ever exist. It contains all of Picasso's art, it contains the answer to all of your questions about life, it contains everything which could possibly exist or not exist in this universe. It contains an exact blueprint for a working time machine, it contains a photo of you right now looking at this website and it contains a photo of the big bang. And every single image it contains is also present in every possible perspective, lighting and modification you can imagine and even those you cannot imagine. The existance of all of those images in this museum is not just likely, it's a 100% certain. You just have to find them. And while this museum contains lots of truth, it contains even more lies. It's up to you to give these images meaning and truth. To you the vast majority of these images will just look like random noise, but every image is unique and if you are very lucky you might see something interesting.
+      <br><br>
+      Just for scale to grasp the size of this museum, there are 10<sup>18</sup> grains of sand on earth and every single grain contains 10<sup>19</sup> atoms. That's a one followed by 19 zeros. The observable universe with all of its grains of sand, all of its stars, its galaxies and its planets contains about 10<sup>84</sup> atoms. Given that the universe is so inconceivably large, the number of atoms of 10<sup>84</sup> is an unbelievably big number. The Museum of Babel contains 10<sup>240.000</sup> images. There's a photo of every single atom in the universe and even that just makes up around 0% of all images in this museum. To store every image in this museum, you would need unimaginably many more 10 TB hard drives than there are atoms in the universe. Now that you are prepared, are you ready to enter the largest museum which has ever existed?</t>
+      <div class="button" onclick="enterMuseum()">ENTER THE MUSEUM</div>
+    </div>
+
+    <div id="museumContainer">
+      <div id="artContainer">
+        <div id="pictureFrame">
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="imageNumberSign">
+          <div class="screwContainer">
+            <div class="screw"></div>
+            <div style="flex-grow: 1"></div>
+            <div class="screw"></div>
+          </div>
+          <t id="imageNumberText">IMAGE_NUMBER_HASH</t>
+          <div class="screwContainer">
+            <div class="screw"></div>
+            <div style="flex-grow: 1"></div>
+            <div class="screw"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>
+
+  <script>
+
+  // Prepare Canvas
+  let canvas = document.getElementById("canvas");
+  let height = canvas.clientHeight;
+  let width = canvas.clientWidth;
+  let ctx = canvas.getContext("2d");
+  let pixelFactor = window.devicePixelRatio;
+  canvas.setAttribute('height', height * pixelFactor);
+  canvas.setAttribute('width', width * pixelFactor);
+  ctx.scale(pixelFactor, pixelFactor);
+
+  // Variables
+  const colors = [
+    "rgb(0, 10, 20)",
+    "rgb(0, 20, 180)",
+    "rgb(0, 170, 20)",
+    "rgb(0, 170, 170)",
+    "rgb(160, 0, 20)",
+    "rgb(160, 0, 180)",
+    "rgb(160, 170, 20)",
+    "rgb(160, 170, 170)",
+    "rgb(20, 80, 190)",
+    "rgb(255, 255, 255)",
+  ];
+
+
+  function enterMuseum() {
+    document.getElementById("infoContainer").style.display = "none";
+
+    setInterval(() => {
+      let num = createRandomImage();
+      document.getElementById("imageNumberText").innerText = num;
+    }, 2000);
+  }
+
+  function createRandomImage() {
+    let imageNumber = [];
+    for (let y = 0; y < 400; y++) {
+      for (let x = 0; x < 600; x++) {
+        let colorIndex = Math.floor(Math.random()*colors.length);
+        ctx.fillStyle = colors[colorIndex];
+        ctx.fillRect(x, y, 1, 1);
+        imageNumber.push(colorIndex);
+      }
+    }
+    return cyrb53(imageNumber);
+    //return imageNumber.slice(0, 10).join("") + "..." + imageNumber.slice(imageNumber.length-10, imageNumber.length).join("");
+  }
+
+
+  // Modified Hash Function from bryc
+  const cyrb53 = (arr, seed = 39482) => {
+    let h1 = 0xdeadbeef ^ seed,
+    h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < arr.length; i++) {
+      ch = arr[i];
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  };
+
+
+</script>

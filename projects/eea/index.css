@@ -1,0 +1,73 @@
+
+body {
+  padding: 0px;
+}
+
+.title {
+  font-size: 32px;
+  font-family: boldest;
+  color: var(--textColor);
+  opacity: 1.0;
+  display: inline-block;
+  margin-top: 5px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+
+.text {
+  font-size: 24px;
+  font-family: bold;
+  color: #2196f3;
+  opacity: 1.0;
+  display: inline-block;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.container {
+  padding-top: 20px;
+  width: calc((100% / 5) - 5px);
+  height: 100%;
+  float: left;
+}
+
+.vdiv {
+  width: 5px;
+  min-height: 100%;
+  background-color: rgb(235, 240, 247);
+  float: left;
+}
+
+
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --textColor: #ffffff;
+  }
+  .vdiv {
+    background-color: rgb(35, 45, 60);
+  }
+}
+
+
+
+/* Mobile mode */
+@media only screen and (max-width:740px) {
+  :root {
+    --padding: 10px;
+  }
+  .textarea {
+    margin-top: 40px;
+  }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+  .generateButton:hover {
+    transform: scale(1.0, 1.0);
+  }
+}

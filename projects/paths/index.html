@@ -1,0 +1,199 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Path Finding Algorithm Demo</title>
+      <meta name="description" content="An algorithm that tries to efficiently find the shortest path through all of the given points." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/paths/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <t class="title" id="title">Place Points and Press Start</t><br />
+      <div id="elementContainer">
+         <div class="button" type="button" id="startButton" onclick="start();">START</div>
+         <div class="button" type="button" id="infoButton" onclick="window.location.href = 'info.html';">?</div>
+         <br />
+      </div>
+      <canvas id="canvas">Canvas is not supported :(</canvas>
+   </body>
+</html>
+
+<script>
+   // Prepare Canvas
+   let canvas = document.getElementById("canvas");
+   let height = canvas.clientHeight;
+   let width = canvas.clientWidth;
+   let ctx = canvas.getContext("2d");
+   let pixelFactor = window.devicePixelRatio;
+   canvas.setAttribute("height", height * pixelFactor);
+   canvas.setAttribute("width", width * pixelFactor);
+   ctx.scale(pixelFactor, pixelFactor);
+   ctx.lineCap = "round";
+
+   // Variables
+   let generationSize = 600;
+   let simultaneousPathFinders = 60;
+   let vertices = [];
+   let pathfinders = [];
+   let running = false;
+
+   // Mouse and touch events for placing cities
+   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--vertexColor");
+
+   canvas.addEventListener(
+      "mousedown",
+      function (e) {
+         placeVertex(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+      },
+      true,
+   );
+
+   canvas.addEventListener(
+      "touchstart",
+      function (e) {
+         placeVertex(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop);
+      },
+      true,
+   );
+
+   function placeVertex(x, y) {
+      vertices.push({ x: x, y: y });
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Add new city to running calculations
+      if (running) {
+         for (let i = 0; i < simultaneousPathFinders; i++) {
+            pathfinders[i].minLength = Infinity;
+            for (let j = 0; j < pathfinders[i].paths.length; j++) {
+               pathfinders[i].paths[j].splice(pathfinders[i].paths[j].length - 1, 0, pathfinders[i].paths[j].length - 1);
+            }
+         }
+      }
+   }
+
+   // Starts the algorithm
+   function start() {
+      running = true;
+      pathfinders = [];
+
+      // Create pathfinders
+      for (let i = 0; i < simultaneousPathFinders; i++) {
+         let pf = new PathFinder();
+         pf.initialize();
+         pathfinders.push(pf);
+      }
+
+      // Update and draw best
+      setInterval(() => {
+         for (let i = 0; i < pathfinders.length; i++) {
+            pathfinders[i].update();
+         }
+         let min = Infinity;
+         let indexShortest = 0;
+         for (let i = 0; i < pathfinders.length; i++) {
+            if (pathfinders[i].minLength < min) {
+               min = pathfinders[i].minLength;
+               indexShortest = i;
+            }
+         }
+         updateScreen(pathfinders[indexShortest].bestPath);
+      }, 100);
+   }
+
+   // Class for pathfinder
+   class PathFinder {
+      constructor() {
+         this.paths = [];
+         this.minLength;
+         this.bestPath = [];
+      }
+
+      // Initialize with completely random generation
+      initialize() {
+         this.minLength = 10000000000000;
+         this.paths = [];
+         for (let i = 0; i < generationSize; i++) {
+            this.paths[i] = [];
+            for (let j = 0; j < vertices.length; j++) {
+               let rnd = -1;
+               do {
+                  rnd = Math.floor(Math.random() * vertices.length);
+               } while (this.paths[i].includes(rnd));
+               this.paths[i].push(rnd);
+            }
+            this.paths[i].push(this.paths[i][0]);
+         }
+      }
+
+      update() {
+         // Find best path in current generation
+         for (let i = 0; i < this.paths.length; i++) {
+            if (this.paths[i].length > 0) {
+               let len = getLengthOfPath(this.paths[i]);
+               if (len < this.minLength) {
+                  this.minLength = len;
+                  this.bestPath = this.paths[i].slice();
+               }
+            }
+         }
+         // Create new generation based on current best path (by swapping elements)
+         this.paths = [];
+         for (let i = 0; i < generationSize; i++) {
+            this.paths.push(mutatePath(this.bestPath));
+         }
+      }
+   }
+
+   // Mutates Path by randomly reversing random rangess
+   function mutatePath(path) {
+      let returnPath = path.slice();
+      let rangeStart = 1 + Math.floor(Math.random() * (path.length - 2));
+      let rangeEnd = 1 + Math.floor(Math.random() * (path.length - 2));
+      if (rangeStart > rangeEnd) {
+         let tmp = rangeStart;
+         rangeStart = rangeEnd;
+         rangeEnd = tmp;
+      }
+      for (let i = 0; i < rangeEnd - rangeStart + 1; i++) {
+         returnPath[rangeStart + i] = path[rangeEnd - i];
+      }
+      return returnPath;
+   }
+
+   // Returns the total length of a given path
+   function getLengthOfPath(path) {
+      let sum = 0;
+      for (let i = 0; i < path.length - 1; i++) {
+         let dx = vertices[path[i]].x - vertices[path[i + 1]].x;
+         let dy = vertices[path[i]].y - vertices[path[i + 1]].y;
+         sum += Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+      }
+      return sum;
+   }
+
+   // Drawing
+   function updateScreen(path) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineWidth = 6;
+
+      // Draw Best Path
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--bestPathColor");
+      for (let i = 0; i < path.length - 1; i++) {
+         ctx.beginPath();
+         ctx.moveTo(vertices[path[i]].x, vertices[path[i]].y);
+         ctx.lineTo(vertices[path[i + 1]].x, vertices[path[i + 1]].y);
+         ctx.stroke();
+      }
+      // Draw cities on top
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--vertexColor");
+      for (let i = 0; i < vertices.length; i++) {
+         ctx.beginPath();
+         ctx.arc(vertices[i].x, vertices[i].y, 8, 0, 2 * Math.PI);
+         ctx.fill();
+      }
+   }
+</script>

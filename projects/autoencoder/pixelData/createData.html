@@ -1,0 +1,71 @@
+<script>
+
+// Converts rgb value to byte index
+function rgbToByte(r, g, b) {
+  return (r+g+b)/3;
+}
+
+// Generate Pixel Data file from jpegs
+let res = "";
+async function imagesToPixelString(from) {
+  if (from-1 == 10000) {
+    console.log("Done");
+    return;
+  }
+  for (let i = from; i < from+100; i++) {
+    load(i);
+    await new Promise(p => setTimeout(p, 50));
+  }
+  let interval = setInterval(() => {
+    if (res.length == 100*56*56) {
+      clearInterval(interval);
+      let formData = new FormData();
+      formData.set("pixelData", res);
+      fetch("../upload.php", {
+        method: "POST",
+        body: formData,
+      }).then(r => {
+        console.log("Success: " + from + " - " + (from+99));
+        res = "";
+        document.body.innerHTML = "";
+        imagesToPixelString(from+100);
+      }).catch(err => console.log("Error: " + err));
+    }
+  }, 100);
+}
+
+// Loads image from server
+async function load(index) {
+  let resolution = 56;
+  let canvas = document.createElement('canvas');
+  canvas.style.display = "fixed";
+  canvas.style.left = 0;
+  canvas.style.top = 0;
+  canvas.style.backgroundColor = "rgb(220, 220, 220)";
+  canvas.width = resolution;
+  canvas.height = resolution;
+  let ctx = canvas.getContext("2d");
+  document.body.appendChild(canvas);
+  var img = new Image;
+
+  await fetch("jpegs/image" + index + ".jpeg")
+  .then(response => response.blob())
+  .then(blob => {
+    img.src = URL.createObjectURL(blob);
+  });
+
+  img.onload = function() {
+    ctx.drawImage(img, 0, 0);
+    let pixels = ctx.getImageData(0, 0, resolution, resolution).data;
+    for (let i = 0; i < pixels.length; i+=4) {
+      let r = pixels[i];
+      let g = pixels[i+1];
+      let b = pixels[i+2];
+      let charCode = rgbToByte(r, g, b);
+      if (charCode < 15) charCode = 15;
+      res += String.fromCharCode(charCode);
+    }
+  };
+}
+
+</script>

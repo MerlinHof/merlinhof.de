@@ -1,0 +1,137 @@
+body {
+  padding: 0px;
+  background-color: rgb(12, 18, 30);
+  color: #ffffff;
+}
+
+* {
+  cursor: default;
+}
+
+t {
+  margin-bottom: 10px;
+}
+
+.title {
+  font-family: boldest;
+  color: #ffffff;
+  font-size: 30px;
+  display: inline-block;
+  margin-bottom: 30px;
+  text-align: center;
+  max-width: 700px;
+}
+
+.text {
+  color: rgb(255, 255, 255, 0.7);
+  display: inline-block;
+  text-align: center;
+  max-width: 700px;
+}
+
+#mainTitle {
+  font-size: clamp(10px, 13vw, 100px);
+  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.1);
+  margin: 0px;
+}
+
+#logoImage {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 60px;
+}
+
+.container {
+  width: 100%;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 100px;
+}
+
+.image {
+  width: clamp(50px, 90%, 700px);
+  height: 350px;
+  border-radius: 42px;
+  overflow: hidden;
+  object-fit: cover;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.icon {
+  width: 45px;
+  height: 45px;
+  margin-right: 20px;
+}
+
+.optionListContainer {
+  width: 300px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.optionListImage {
+  width: 26px;
+  height: 26px;
+  margin-right: 15px;
+  object-fit: contain;
+}
+
+.colorContainer {
+  font-size: 36px;
+  font-family: boldest;
+  background-color: rgba(40, 220, 190, 0.3);
+  padding-top: 25px;
+  padding-bottom: 19px;
+  padding-left: 40px;
+  padding-right: 40px;
+  border-radius: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vSpace {
+  height: 40px;
+}
+
+
+#blueBox {
+  background-color: rgb(20, 160, 220);
+}
+
+#madeInGermanyLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#smallText {
+  font-size: 24px;
+}
+#largeText {
+  font-size: 26px;
+  font-family: boldest;
+}
+#germanyFlag {
+  height: 50px;
+  margin-right: 20px;
+}
+
+
+
+
+
+/* Mobile mode */
+@media only screen and (max-width: 640px) {
+  .codeContainer {
+    padding: 10px;
+    padding-left: 13px;
+    padding-right: 13px;
+    border-radius: 12px;
+  }
+}

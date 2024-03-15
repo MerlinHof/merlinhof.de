@@ -1,0 +1,144 @@
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Autoencoder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/autoencoder/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <t class="title" id="title">Autoencoder</t><br>
+  <canvas id="canvas"></canvas><br>
+  <div id="controlContainer">
+    <div class="button" type="button" onclick="startTraining();">TRAIN</div>
+    <!-- <div class="button" type="button" onclick="">WAS IST DAS?</div> -->
+  </div><br>
+  <t class="text" id="statusText">Press train to start</t>
+</body>
+</html>
+
+
+<script src="nn.js"></script>
+<script>
+
+
+// Prepare Canvas
+let canvas = document.getElementById("canvas");
+let height = canvas.clientHeight;
+let width = canvas.clientWidth;
+let ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+canvas.setAttribute('height', height * pixelFactor);
+canvas.setAttribute('width', width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+
+// Global Variables
+let dataSet = [];
+let autoencoder;
+
+// Converts byte index to rgb value
+function byteToRgb(val) {
+  return {
+    r: val,
+    g: val,
+    b: val
+  }
+}
+
+async function startTraining() {
+  await loadImages();
+  trainModel();
+}
+
+function log(msg) {
+  document.getElementById("statusText").innerHTML = msg;
+}
+
+async function loadImages() {
+  await fetch("pixelData/10k_bw")
+  .then(res => res.text())
+  .then(res => {
+    for (let i = 0; i < res.length; i++) {
+      dataSet.push(res.charCodeAt(i));
+    }
+  });
+}
+
+function drawImage(pixelData, n) {
+  for (let i = 0; i < 56*56; i++) {
+    let color = byteToRgb(pixelData[n*56*56+i]);
+    ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    let x = i%56;
+    let y = Math.floor(i/56);
+    ctx.fillRect(5*x, 5*y, 5, 5);
+  }
+}
+
+
+let trainedNet = [];
+async function trainModel() {
+  log("Trainig started...");
+  await new Promise(res => setTimeout(res, 100));
+  let shape = [3136, 700, 200, 50, 30, 10, 30, 50, 200, 700, 3136];
+  autoencoder = new NeuralNetwork(shape);
+
+  let trainingData = [];
+  for (let i = 0; i < 10000; i++) {
+    let tmpImg = normalize(dataSet.slice(i*56*56, (i+1)*56*56));
+    trainingData.push([[...tmpImg], [...tmpImg]]);
+  }
+
+  autoencoder.learningRate = 0.01;
+  autoencoder.epochs = 10;
+  let startTime = Date.now();
+  autoencoder.train(trainingData, (progress, error) => {
+    let now = Date.now()
+    let speed = Math.round((now - startTime)/(trainingData.length*autoencoder.epochs/1000));
+    startTime = now;
+    log("Training: " + progress + " %<br>Error: " + Math.round(error*10000)/10000 + "<br>LR: " + autoencoder.learningRate + "<br>Speed: " + speed + " ms/img");
+    // if (progress >= 15) autoencoder.learningRate = 0.3;
+    // if (progress >= 3) autoencoder.learningRate = 0.004;
+    // if (progress >= 11) autoencoder.learningRate = 0.0008;
+    // if (progress >= 35) autoencoder.learningRate = 0.0003;
+    // if (progress >= 60) autoencoder.learningRate = 0.0001;
+    if (progress == 100) {
+      trainedNet = autoencoder.weights;
+      log("Training done, net was saved");
+    }
+    let rnd = Math.floor(Math.random()*10000);
+    let inputs = normalize(dataSet.slice(rnd*56*56, (rnd+1)*56*56));
+    let generatedPixels = autoencoder.predict(inputs);
+    drawImage(denormalize(generatedPixels), 0);
+  });
+}
+
+function normalize(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] -= 127.5;
+    arr[i] /= 127.5;
+  }
+  return arr;
+}
+
+function denormalize(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] *= 127.5;
+    arr[i] += 127.5;
+  }
+  return arr;
+}
+
+function testRandom() {
+  let inputs = [];
+  for (let i = 0; i < 10; i++) {
+    inputs.push(1-2*Math.random());
+  }
+  let generatedPixels = autoencoder.predict(inputs, 5);
+  denormalize(generatedPixels);
+  drawImage(generatedPixels, 0);
+}
+
+</script>

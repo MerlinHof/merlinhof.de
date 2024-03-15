@@ -1,0 +1,98 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Wind Optimization</title>
+  <meta name="description" content="..."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/windopt/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+
+</head>
+
+<body>
+  <canvas id="canvas">Canvas is not supported :(</canvas>
+</body>
+</html>
+
+<script src="utils.js"></script>
+<script>
+  // Prepare Canvas
+  let canvas = document.getElementById('canvas');
+  let height = canvas.clientHeight;
+  let width = canvas.clientWidth;
+  let ctx = canvas.getContext("2d");
+  let pixelFactor = window.devicePixelRatio;
+  canvas.setAttribute('height', height * pixelFactor);
+  canvas.setAttribute('width', width * pixelFactor);
+  ctx.scale(pixelFactor, pixelFactor);
+  ctx.lineWidth = 2;
+
+
+  // Global Variables and Constants
+  let center = new Point(width/2, height/2);
+  let bladeGeneration = [];
+
+  // start2(0);
+  // function start2(angle) {
+  //   ctx.clearRect(0, 0, width, height);
+  //   let blade = new Blade();
+  //   blade.mutate(80);
+  //   let wind = new Wind(center, angle);
+  //   wind.draw();
+  //   blade.draw();
+  //   center.draw();
+  //   wind.getForceOnBlade(blade);
+  //   setTimeout(() => {
+  //     //start2(angle+0.01);
+  //   }, 1000/60);
+  // }
+
+
+  // Starts the algorithm
+  async function start() {
+
+    for (let i = 0; i < generationSize; i++) {
+      let blade = new Blade();
+      blade.mutate(80);
+      bladeGeneration.push(blade);
+    }
+
+    let genCounter = 0;
+    while (true) {
+      genCounter++;
+      let maxForce = -Infinity;
+      let bestBladeIndex;
+      for (let i = 0; i < generationSize; i++) {
+        let force = bladeGeneration[i].getTotalWindForce();
+        if (force > maxForce) {
+          if (bladeGeneration[i].isValid()) {
+            maxForce = force;
+            bestBladeIndex = i;
+          }
+        }
+      }
+      ctx.clearRect(0, 0, width, height);
+      bladeGeneration[bestBladeIndex].draw();
+      center.draw();
+      console.log("Gen " + genCounter + ": " + maxForce);
+
+      // Create new Generation
+      for (let i = 0; i < generationSize; i++) {
+        if (i == bestBladeIndex) continue;
+        let blade = bladeGeneration[bestBladeIndex].clone();
+        blade.mutate(5);
+        bladeGeneration[i] = blade;
+      }
+      await wait(100);
+    }
+  }
+
+
+
+
+  async function wait(ms) {
+    return new Promise(res => setTimeout(res, ms));
+  }
+
+</script>

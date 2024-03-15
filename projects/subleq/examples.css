@@ -1,0 +1,33 @@
+* {
+   -webkit-user-select: text;
+   max-width: 1000px;
+}
+
+.example_container {
+   display: block;
+   width: calc(100% - 40px);
+   border-radius: var(--borderRadius);
+   padding-left: 25px;
+   padding-right: 25px;
+   padding-top: 1px;
+   padding-bottom: 1px;
+   margin-top: 0px;
+   overflow: scroll;
+   margin-top: 20px;
+}
+
+.example_code {
+   opacity: 1;
+   font-size: 24px;
+}
+
+/* Mobile mode */
+@media only screen and (max-width: 640px) {
+   .example_container {
+      display: block;
+      width: calc(100% - 35px);
+      padding-left: 10px;
+      padding-top: 0px;
+      overflow: scroll;
+   }
+}

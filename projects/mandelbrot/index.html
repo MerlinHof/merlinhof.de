@@ -1,0 +1,196 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Mandelbrot Fractal</title>
+      <meta name="description" content="A beautiful visualization of the famous mandelbrot set." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <base href="/projects/mandelbrot/" />
+      <link rel="stylesheet" href="/styles/shared.css?v=18" />
+      <link rel="stylesheet" href="index.css?v=18" />
+   </head>
+
+   <body>
+      <canvas id="canvas">Your browser does not support the canvas element.</canvas>
+      <div id="splashContainer">
+         <t class="title">Mandelbrot Set</t>
+         <div>
+            <div onclick="selectVersion(1)" class="button" id="startbutton">JS Default</div>
+            <div onclick="selectVersion(2)" class="button" id="startbutton">JS Multithreaded</div>
+            <div onclick="selectVersion(0)" class="button" id="startbutton">Web Assembly</div>
+         </div>
+      </div>
+   </body>
+
+   <script>
+      // Prepare Canvas
+      let canvas = document.getElementById("canvas");
+      let height = canvas.clientHeight;
+      let width = canvas.clientWidth;
+      let ctx = canvas.getContext("2d");
+      let pixelFactor = window.devicePixelRatio;
+      canvas.setAttribute("height", height * pixelFactor);
+      canvas.setAttribute("width", width * pixelFactor);
+      ctx.scale(pixelFactor, pixelFactor);
+      ctx.lineCap = "round";
+
+      function selectVersion(version) {
+         document.getElementById("splashContainer").style.display = "none";
+         switch (version) {
+            case 0:
+               wasmVersion();
+               break;
+            case 1:
+               jsVersion();
+               break;
+            case 2:
+               jsMultithreadedVersion();
+               break;
+         }
+      }
+
+      // ------------------------------------------------------------------------------------------
+      // WASM Version
+
+      function wasmVersion() {
+         let image = new ImageData(pixelFactor * width, pixelFactor * height);
+         let pixelCount = image.data.length;
+         let pixels;
+
+         fetch("main.wasm")
+            .then((response) => response.arrayBuffer())
+            .then((bytes) => WebAssembly.instantiate(bytes, {}))
+            .then((results) => {
+               let scale = Math.min(width, height) / 1.5;
+               let pos = { x: (width / 3.9 / scale) * pixelFactor, y: (height / 2.0 / scale) * pixelFactor };
+               let memory = results.instance.exports.memory;
+               pixels = new Int32Array(memory.buffer, 0, pixelCount);
+               setInterval(() => {
+                  scale *= 1.01;
+                  results.instance.exports.makeMandelbrot(pixels, pos.x, pos.y, scale, width, height, pixelFactor, pixelCount);
+                  image.data.set(pixels);
+                  ctx.putImageData(image, 0, 0);
+               }, 0);
+            });
+      }
+
+      // ------------------------------------------------------------------------------------------
+      // JS Version
+
+      let image = new ImageData(pixelFactor * width, pixelFactor * height);
+      let maxIterations = 100;
+      let pixels = image.data;
+
+      function jsVersion() {
+         let scale = Math.min(width, height) / 1.5;
+         let pos = { x: (width / 3.9 / scale) * pixelFactor, y: (height / 2.0 / scale) * pixelFactor };
+         drawMandelbrot(pos, scale);
+
+         setInterval(() => {
+            scale *= 1.01;
+            drawMandelbrot(pos, scale);
+         }, 0);
+      }
+
+      function drawMandelbrot(pos, scale) {
+         for (let y = 0; y < pixelFactor * height; y++) {
+            for (let x = 0; x < pixelFactor * width; x++) {
+               let loc = { x: pos.x - x / scale, y: pos.y - y / scale };
+               let a = 0;
+               let b = 0;
+               let cnt = 0;
+               while (a * a + b * b < 8 && cnt < maxIterations) {
+                  let tmp = a;
+                  a = a * a - b * b + loc.x;
+                  b = 2 * tmp * b + loc.y;
+                  cnt++;
+               }
+               let offset = (y * pixelFactor * width + x) * 4;
+               pixels[offset] = (510 * cnt) / maxIterations;
+               pixels[offset + 1] = (1020 * cnt) / maxIterations;
+               pixels[offset + 2] = (1530 * cnt) / maxIterations;
+               pixels[offset + 3] = 255;
+            }
+         }
+
+         ctx.putImageData(image, 0, 0);
+      }
+
+      // ------------------------------------------------------------------------------------------
+      // JS Multithreaded Version
+
+      image = new ImageData(pixelFactor * width, pixelFactor * height);
+      pixels = image.data;
+
+      function jsMultithreadedVersion() {
+         let scale = Math.min(width, height) / 1.5;
+         let pos = { x: (width / 3.9 / scale) * pixelFactor, y: (height / 2.0 / scale) * pixelFactor };
+         let pixelCount = pixels.length;
+
+         // MacBook Pro 2017: 4 Threads -> 4 Workers
+         let w0 = new Worker("worker.js");
+         let w1 = new Worker("worker.js");
+         let w2 = new Worker("worker.js");
+         let w3 = new Worker("worker.js");
+         loop();
+         let finished = [false, false, false, false];
+
+         function loop() {
+            w0.postMessage({ threadId: 0, threadCount: 4, height: height, width: width, scale: scale, pos: pos });
+            w1.postMessage({ threadId: 1, threadCount: 4, height: height, width: width, scale: scale, pos: pos });
+            w2.postMessage({ threadId: 2, threadCount: 4, height: height, width: width, scale: scale, pos: pos });
+            w3.postMessage({ threadId: 3, threadCount: 4, height: height, width: width, scale: scale, pos: pos });
+
+            let interval = setInterval(() => {
+               if (finished.every((elem) => elem == true)) {
+                  finished = [false, false, false, false];
+                  clearInterval(interval);
+                  scale *= 1.01;
+                  ctx.putImageData(image, 0, 0);
+                  loop();
+               }
+            }, 1);
+         }
+
+         w0.addEventListener(
+            "message",
+            function (e) {
+               for (let i = 0; i < pixelCount / 4; i++) {
+                  pixels[i] = e.data[i];
+               }
+               finished[0] = true;
+            },
+            false,
+         );
+         w1.addEventListener(
+            "message",
+            function (e) {
+               for (let i = pixelCount / 4; i < (2 * pixelCount) / 4; i++) {
+                  pixels[i] = e.data[i - pixelCount / 4];
+               }
+               finished[1] = true;
+            },
+            false,
+         );
+         w2.addEventListener(
+            "message",
+            function (e) {
+               for (let i = (2 * pixelCount) / 4; i < (3 * pixelCount) / 4; i++) {
+                  pixels[i] = e.data[i - (2 * pixelCount) / 4];
+               }
+               finished[2] = true;
+            },
+            false,
+         );
+         w3.addEventListener(
+            "message",
+            function (e) {
+               for (let i = (3 * pixelCount) / 4; i < pixelCount; i++) {
+                  pixels[i] = e.data[i - (3 * pixelCount) / 4];
+               }
+               finished[3] = true;
+            },
+            false,
+         );
+      }
+   </script>
+</html>

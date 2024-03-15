@@ -1,0 +1,34 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>String Art</title>
+  <meta name="description" content="An algorithm that does string art."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/stringart/">
+  <link rel="stylesheet" href="index.css?v=18">
+  <script src="script.js" defer="defer"></script>
+</head>
+
+<body>
+  <div id="mainContainer">
+    <div id="sideBar">
+      <t class="title">StringArt</t>
+      <t class="text" id="logText">Welcome</t>
+      <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="processImage()"></input>
+      <canvas id="previewCanvas" onclick="triggerFileInput()" width="100" height="100"></canvas>
+      <div class="settingsElementContainer">
+        <t class="text">Number of Pins</t>
+        <input type="text" id="inputNumberOfPins" spellcheck="false" value="240" placeholder=""/><br>
+      </div>
+      <div class="settingsElementContainer">
+        <t class="text">Thread Opacity</t>
+        <input type="text" id="inputThreadOpacity" spellcheck="false" value="0.25" placeholder=""/><br>
+      </div>
+      <div style="flex-grow:1"></div>
+      <div class="button" onclick="calcPath()" id="calcButton" style="margin-bottom: 30px; display: none;">CALCULATE</div>
+    </div>
+    <canvas id="canvas" width="100px" height="100px"></canvas>
+  </div>
+</body>
+
+</html>

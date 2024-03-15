@@ -1,0 +1,49 @@
+<html>
+
+<head>
+<link rel=icon href=sources/favicon.png>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error 404</title>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="/sources/common.css?v=18">
+</head>
+
+<style>
+* {
+  font-family: boldest;
+}
+#notFoundContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+}
+#errorIcon {
+  width: 90vw;
+  height: 90vw;
+  max-width: 300px;
+  max-height: 300px;
+  margin-bottom: 30px;
+  object-fit: contain;
+}
+#errorTitle {
+  text-align: center;
+  font-size: 28px;
+  color: #ffffff;
+}
+</style>
+
+<body>
+<div id="notFoundContainer">
+  <img id="errorIcon" src="sources/404.svg">
+  <t class="title" id="errorTitle">This page does not exist</t>
+</div>
+
+</body>
+</html>

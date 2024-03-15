@@ -1,0 +1,126 @@
+:root {
+   --padding: 40px;
+   --textColor: #000000;
+}
+
+#containerAlice {
+   min-height: 100%;
+   width: calc(50% - var(--padding));
+   float: left;
+}
+#containerBob {
+   min-height: 100%;
+   width: calc(50% - var(--padding));
+   float: right;
+}
+
+.name {
+   font-family: bold;
+   font-size: 40px;
+   color: var(--textColor);
+}
+
+.textarea {
+   -webkit-user-select: text;
+   color: var(--textColor);
+   font-size: 24px;
+   width: 60%;
+   border-radius: var(--borderRadius);
+   outline: none;
+   resize: none;
+   padding: 10px;
+   padding-left: 15px;
+   padding-right: 15px;
+   overflow: auto;
+   height: 50px;
+   width: 100%;
+   display: inline-block;
+   margin-top: 50px;
+   margin-bottom: 20px;
+}
+
+.subtitle {
+   color: var(--textColor);
+   font-family: standard;
+   opacity: 0.3;
+}
+
+.text {
+   font-size: 24px;
+   color: var(--textColor);
+   opacity: 1;
+   display: inline-block;
+   margin-top: 5px;
+   word-break: break-all;
+   transition: all 0.2s;
+}
+
+.text:active {
+   opacity: 0.5;
+   transform: scale(0.8, 0.8);
+}
+
+.vdiv {
+   width: 5px;
+   height: 100%;
+   background-color: rgb(235, 240, 247);
+   position: fixed;
+   top: 0px;
+   left: calc(50% - 2.5px);
+}
+
+.generateButton {
+   color: rgb(40, 140, 255);
+   background-color: rgba(40, 140, 255, 0.2);
+   padding-top: 12px;
+   padding-bottom: 12px;
+   padding-left: 24px;
+   padding-right: 24px;
+   border-radius: 50px;
+}
+.generateButton:hover {
+   transform: scale(1.05);
+}
+
+.generateText {
+   cursor: pointer;
+   word-break: break-all;
+   display: inline-block;
+   font-size: 17px;
+   font-family: boldest;
+   margin-top: 10px;
+   margin-bottom: 20px;
+   transition: all 0.3s;
+}
+
+.button {
+   margin-top: 0px;
+   margin-bottom: 40px;
+}
+
+/* Dark mode*/
+@media (prefers-color-scheme: dark) {
+   :root {
+      --textColor: #ffffff;
+   }
+   .vdiv {
+      background-color: rgb(35, 45, 60);
+   }
+}
+
+/* Mobile mode */
+@media only screen and (max-width: 740px) {
+   :root {
+      --padding: 10px;
+   }
+   .textarea {
+      margin-top: 40px;
+   }
+}
+
+/* Disable hovering for large touch devices like iPad*/
+@media (hover: none) {
+   .generateButton:hover {
+      transform: scale(1, 1);
+   }
+}

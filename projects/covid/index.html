@@ -1,0 +1,192 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Covid Monitor</title>
+  <meta name="description" content="A simplistic monitor of the cases and deaths of the covid19 disease."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/covid/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+</head>
+
+<body>
+  <a class="title" id="countryname">Deutschland</a><br>
+  <a class="subtitle">Coronavirusmonitor</a><br>
+
+  <div class="foreground" id="graphContainer">
+    <canvas id="myCanvas" class="canvas"></canvas>
+  <div>
+
+  <div id="upperinfo">
+    <div class="dot" id="reddot"></div>
+    <a class="text">Gesamt</a>
+  </div>
+  <div id="lowerinfo">
+    <div class="dot" id="bluedot"></div>
+    <a class="text">Todesfälle</a>
+  </div>
+  <div id="lowerinfo">
+    <div class="dot" id="greendot"></div>
+    <a class="text">Neuinfektionen</a>
+  </div>
+
+</body>
+
+</html>
+<script>
+
+let country = window.location.search.substring(9, window.location.search.length);
+country = country.toLowerCase();
+if (country == "") {
+  country = "germany";
+}
+httpGetAsync('https://api.covid19api.com/dayone/country/' + country, finished);
+
+switch (country) {
+  case "germany":
+    country = "Deutschland";
+    break;
+  case "sweden":
+    country = "Schweden";
+    break;
+  case "india":
+    country = "Indien";
+    break;
+  case "italy":
+    country = "Italien";
+    break;
+}
+document.getElementById("countryname").innerHTML = country.substring(0, 1).toUpperCase() + country.substring(1, country.length).toLowerCase();
+
+
+function httpGetAsync(theUrl, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+      callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true);
+    xmlHttp.send(null);
+}
+
+let cases = [];
+let deaths = [];
+function finished(res) {
+
+  let tmpStr = res;
+  while(tmpStr.includes("Confirmed")) {
+    let ss = tmpStr.substring(0, tmpStr.indexOf("Confirmed") + 11);
+    tmpStr = tmpStr.replace(ss, "");
+    cases.push(tmpStr.substring(0, tmpStr.indexOf("Deaths")-2));
+  }
+
+  tmpStr = res;
+  while(tmpStr.includes("Deaths")) {
+    let ss = tmpStr.substring(0, tmpStr.indexOf("Deaths") + 8);
+    tmpStr = tmpStr.replace(ss, "");
+    deaths.push(tmpStr.substring(0, tmpStr.indexOf("Recovered")-2));
+  }
+
+  drawGraphs();
+}
+
+
+// Prepare Canvas
+var canvas = document.getElementById("myCanvas");
+var height = canvas.clientHeight;
+var width = canvas.clientWidth;
+var ctx = canvas.getContext("2d");
+ctx.clearRect(0, 0, width, height);
+ctx.fillStyle = "#ffffff";
+ctx.lineCap = 'round';
+let pixelFactor = window.devicePixelRatio;
+let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+canvas.setAttribute('height', style_height * pixelFactor);
+canvas.setAttribute('width', style_width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+
+// Draw Graphs
+function drawGraphs() {
+  ctx.lineWidth = 5;
+  let gcHeight = document.getElementById("graphContainer").clientHeight
+  let gcWidth = document.getElementById("graphContainer").clientWidth
+  let xScale = gcWidth/(cases.length-7);
+  let yScale = (gcHeight-40)/Math.max(...cases);
+
+  // Cases
+  ctx.strokeStyle = "rgb(233, 81, 94)";
+  let prev = gcHeight-20
+
+  ctx.beginPath();
+  ctx.moveTo(-10, gcHeight+10);
+  ctx.lineTo(0, gcHeight-20);
+  for (let i = 0; i < cases.length-6; i++) {
+    let y = 0;
+    for (let j = 0; j < 7; j++) {
+      y += parseInt(cases[i+j]);
+    }
+    y /= 7;
+    prev = -(y*yScale) + gcHeight-20;
+    ctx.lineTo(i*xScale, prev);
+  }
+  ctx.lineTo(gcWidth+10, prev);
+  ctx.lineTo(gcWidth+10, gcHeight+10);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(233, 81, 94, 0.1)";
+  ctx.fill();
+  ctx.stroke();
+
+  // Deaths
+  ctx.strokeStyle = "rgb(77, 140, 180)";
+  ctx.beginPath();
+  ctx.moveTo(-10, gcHeight+10);
+  ctx.lineTo(0, gcHeight-20);
+  for (let i = 1; i < deaths.length; i++) {
+    prev = -(deaths[i]*yScale*15) + gcHeight-20;
+    ctx.lineTo(i*xScale, prev);
+    ctx.stroke();
+  }
+  ctx.lineTo(gcWidth+10, prev);
+  ctx.lineTo(gcWidth+10, gcHeight+10);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(77, 140, 180, 0.2)";
+  ctx.fill();
+  ctx.stroke();
+
+  // Neuinfektionen
+  ctx.strokeStyle = "rgb(77, 210, 120)";
+  prev = gcHeight-20;
+  let newcases = [];
+  for (let i = 7; i < cases.length; i++) {
+    let val = 0;
+    for (let j = 0; j < 7; j++) {
+      val += parseInt(cases[i-j] - cases[i-j-1]);
+    }
+    val /= 7;
+    newcases.push(val);
+  }
+  yScale = (gcHeight-40)/Math.max(...newcases);
+
+  ctx.beginPath();
+  ctx.moveTo(-10, gcHeight+10);
+  ctx.lineTo(0, gcHeight-20);
+  for (let i = 7; i < newcases.length; i++) {
+    let y = 0;
+    for (let j = 0; j < 7; j++) {
+      y += parseInt(newcases[i-j]);
+    }
+    y /= 7;
+
+    prev = -(y*yScale) + gcHeight-20;
+    ctx.lineTo(i*xScale, prev);
+  }
+  ctx.lineTo(gcWidth+10, prev);
+  ctx.lineTo(gcWidth+10, gcHeight+10);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(77, 210, 120, 0.25)";
+  ctx.fill();
+  ctx.stroke();
+}
+
+</script>

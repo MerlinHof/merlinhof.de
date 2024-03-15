@@ -1,0 +1,50 @@
+body {
+   overflow: hidden;
+   padding: 0px;
+}
+
+* {
+   cursor: cell;
+}
+
+#canvas {
+   width: 100%;
+   height: 100vh;
+}
+
+#inventory {
+   z-index: 5;
+   position: absolute;
+   left: 50%;
+   transform: translate(-50%);
+   top: 20px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.inventoryItem {
+   border: 2px solid rgba(0, 0, 0, 0.1);
+   background-color: white;
+   border-radius: 12px;
+   margin: 6px;
+   padding: 8px 20px;
+   transition: 0.3s;
+   user-select: none;
+   -webkit-user-select: none;
+}
+.inventoryItem:active {
+   transform: scale(0.8);
+   opacity: 0.7;
+}
+.inventoryItem:hover {
+   background-color: rgba(0, 0, 0, 0.1);
+}
+
+.selected {
+   background-color: black;
+   color: white;
+}
+.selected:hover {
+   background-color: black;
+}

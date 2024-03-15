@@ -1,0 +1,253 @@
+<html>
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Bitcoin Price Prediction using Artificial Intelligence</title>
+  <meta name="description" content="An AI trains itself using the historical prices of bitcoin and tries to predict the close prices for the next few days."/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/code/stockai/">
+  <link rel="stylesheet" href="/sources/common.css?v=18">
+  <link rel="stylesheet" href="index.css?v=18">
+  <script type="text/javascript"></script>
+</head>
+
+<body>
+  <t class="title" id="title">Bitcoin Predictor</t><br>
+  <canvas id="canvas"></canvas><br>
+  <div id="controlContainer">
+    <div class="button" type="button" onclick="startTraining();">START</div>
+    <div class="button" type="button" id="infobutton" onclick="window.location.href = 'info.html';">?</div>
+  </div><br>
+  <t class="text" id="statusText"></t>
+</body>
+</html>
+
+
+<script src="data.js"></script>
+<script src="nn.js"></script>
+
+<script>
+// Prepare Canvas
+let canvas = document.getElementById('canvas');
+let height = canvas.clientHeight;
+let width = canvas.clientWidth;
+let ctx = canvas.getContext("2d");
+let pixelFactor = window.devicePixelRatio;
+canvas.setAttribute('height', height * pixelFactor);
+canvas.setAttribute('width', width * pixelFactor);
+ctx.scale(pixelFactor, pixelFactor);
+ctx.lineCap = 'round';
+
+// Setup variables
+let sd = new StockDataController();
+let generation = [];
+let generationSize = 300;
+let generationCounter = 0;
+let startError = 0;
+
+function updateGraph(prediction) {
+  ctx.clearRect(0, 0, width, height);
+
+  // Push all the data into one array and integrate
+  let data = [];
+  for (let i = 0; i < 19; i++) {
+    if (i < 14) {
+      data[i] = sd.changes[sd.changes.length-14+i];
+    } else {
+      data[i] = prediction[i-14];
+    }
+  }
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) {
+    sum -= data[i];
+    data[i] = sum;
+  }
+  let min = Math.min(...data);
+  let max = Math.max(...data);
+
+  // Day divider lines & text
+  ctx.font = "14px Monospace";
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 18; i++) {
+    let x = (i*width)/18;
+    ctx.lineWidth = 4;
+    if (i > 0) {
+      let lineColor = 'rgba(210, 225, 240, 0.07)';
+      let textColor = 'rgba(210, 225, 240, 0.2)';
+      if (i == 13) {
+        lineColor = 'rgba(255, 160, 130, 1.0)';
+        textColor = 'rgba(255, 160, 130, 1.0)';
+      }
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height - 30);
+      ctx.strokeStyle = lineColor;
+      ctx.stroke();
+      ctx.fillStyle = textColor;
+      let text = i-13;
+      if (text == 0) text = "NOW";
+      if (text > 0) text = "+" + text;
+      ctx.fillText(text, x - 13, height - 10);
+    }
+  }
+
+  // Draw Stroke Path
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(210, 225, 240, 1.0)';
+  ctx.beginPath();
+  for (let i = 0; i < 18; i++) {
+    let x = (i*width)/18;
+    let y = getScaledY(data[i], min, max);
+    let xc = (x + ((i+1)*width)/18)/2;
+    let yc = (y + getScaledY(data[i+1], min, max))/2;
+    ctx.quadraticCurveTo(x, y, xc, yc);
+  }
+  ctx.stroke();
+
+  // Draw Fill Path
+  ctx.lineWidth = 0;
+  let grad = ctx.createLinearGradient(width/2, 0, width/2, height);
+  grad.addColorStop(0, 'rgba(180, 195, 210, 0.2)');
+  grad.addColorStop(1, 'rgba(180, 195, 210, 0.05)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  let x, y;
+  for (let i = 0; i < 18; i++) {
+    x = (i*width)/18;
+    y = getScaledY(data[i], min, max);
+    let xc = (x + ((i+1)*width)/18)/2;
+    let yc = (y + getScaledY(data[i+1], min, max))/2;
+    ctx.quadraticCurveTo(x, y, xc, yc);
+  }
+  ctx.lineTo(x+0.5*width/18, height);
+  ctx.lineTo(0, height);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function getScaledY(x, min, max) {
+  return 20+((height-65)*(x-min))/(max-min);
+}
+
+
+
+
+
+async function startTraining() {
+  log('Fetching Data...');
+  await sd.fetchData(res => {
+    console.log(res);
+    if (res == -1) {
+      log('An error occured. Try again in a few seconds.');
+    } else {
+      updateGraph([0, 0, 0, 0, 0]);
+    }
+  });
+
+  if (sd.changes.length > 20) {
+    log('Training...');
+    for (let i = 0; i < generationSize; i++) {
+      let nn = new NeuralNetwork([14, 12, 10, 5]);
+      generation.push(nn);
+    }
+    setTimeout(() => {
+      train();
+    }, 50);
+  } else {
+    log('Oops, something went wrong...');
+  }
+}
+
+
+function train() {
+  generationCounter++;
+
+  // Test each net
+  let minFitness = 999999999;
+  let bestIndex;
+  let minError;
+  for (let i = 0; i < generationSize; i++) {
+    let error = 0;
+    let diversity = 0;
+    let prediction = [];
+    for (let j = 0; j < sd.changes.length - 19; j++) {
+      let inputs = [];
+      for (let k = 0; k < 14; k++) {
+        inputs.push(sd.changes[j+k]);
+      }
+      let correctAnswers = [];
+      for (let k = 14; k < 19; k++) {
+        correctAnswers.push(sd.changes[j+k]);
+      }
+      prediction = generation[i].predict(inputs);
+      for (let k = 0; k < 5; k++) {
+        error += Math.abs(correctAnswers[k] - prediction[k]);
+        diversity += Math.abs(prediction[k])/100;
+      }
+    }
+
+    // Punishing for low diversity (avoid horizontal line)
+    let fitness = error;
+    fitness += Math.pow(1000.0/diversity, 2);
+
+    if (fitness < minFitness) {
+      minError = error;
+      minFitness = fitness;
+      bestIndex = i;
+    }
+  }
+
+  // Draw best
+  let inputs = [];
+  for (let i = 0; i < 14; i++) {
+    inputs.push(sd.changes[sd.changes.length-14+i]);
+  }
+  let prediction = generation[bestIndex].predict(inputs);
+  updateGraph(prediction);
+  console.log(generationCounter + ': ' + minFitness + ' (' + minError + ')');
+  if (startError == 0) startError = minError;
+  let accuracy = Math.round((100 - (100*minError/startError))*10)/10.0;
+  log('Gen ' + generationCounter + '<br>' + accuracy + '% accurate');
+
+  // Adjust Mutation Rate
+  let mutationRate = 0.3;
+  if (generationCounter >= 8) {
+    mutationRate = 0.06;
+  }
+  if (generationCounter >= 20) {
+    mutationRate = 0.03;
+  }
+  if (generationCounter >= 27) {
+    mutationRate = 0.01;
+  }
+  if (generationCounter >= 37) {
+    mutationRate = 0.004;
+  }
+  if (generationCounter >= 50) {
+    mutationRate = 0.0008;
+  }
+
+  // Create new generation
+  generation[0].weights = [...generation[bestIndex].weights];
+  for (let i = 1; i < Math.floor(3/4*generationSize); i++) {
+    generation[i].weights = [...generation[bestIndex].weights];
+    generation[i].mutate(mutationRate);
+  }
+  for (let i = Math.floor(3/4*generationSize); i < generationSize; i++) {
+    generation[i].weights = [...generation[bestIndex].weights];
+    generation[i].mutate(4*mutationRate);
+  }
+
+  if (generationCounter < 300) {
+    setTimeout(() => {
+      train();
+    }, 500);
+  }
+}
+
+function log(str) {
+  document.getElementById('statusText').innerHTML = str;
+}
+
+
+</script>

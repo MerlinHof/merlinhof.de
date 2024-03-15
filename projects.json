@@ -1,0 +1,269 @@
+{
+   "code": [
+      {
+         "active": false,
+         "title": "CleanCode",
+         "description": "Eine nagelneue, unglaublich schnelle und effiziente Programmiersprache mit logischer Syntax, starken Abstraktionen, integrierter GUI und ohne Boilerplate. Und das beste: Programme laufen nativ auf jeder Plattform!",
+         "image": "galaxy.jpg",
+         "url": "projects/cleancode"
+      },
+      {
+         "active": true,
+         "title": "Flappy Bird Ai",
+         "description": "Eine genetischer Algorithmus lernt nach dem Prinzip \"Survival of the Fittest\", die Vögel geschickt durch die Hindernisse zu führen.",
+         "image": "flappybird.jpg",
+         "url": "projects/flappybird"
+      },
+      {
+         "active": false,
+         "title": "Klima, Natur & Umwelt",
+         "description": "Eine kompakte und wunderschöne Seite, die auf den Punkt gebracht den Klimawandel und die bevorstehende Klimakatastrophe verständlich erklärt. Perfekt zum Weiterleiten an Querdenker und andere faktenresistente Wissenschaftsfeinde.",
+         "image": "climate.jpg",
+         "url": "https://www.climate-disaster.com"
+      },
+      {
+         "active": true,
+         "title": "Clippy Markdown Pastebin",
+         "description": "Speichere und teile Markdown Dokumente mit der Welt! Keine Werbung, kein Login und völlig kostenlos. Perfekt für Blogs, Bücher, Anleitungen und vieles mehr. Das Design legt einen großen Fokus auf die Benutzerfreundlichkeit, während Clippy von modernsten Ki-Features profitiert.",
+         "image": "clippy2.jpg",
+         "url": "https://www.clippy.cc"
+      },
+      {
+         "active": true,
+         "title": "Netz Simulation",
+         "description": "Sehr befriedigende Simulation eines hängenden, elastischen Netzes. Mit der Maus oder mit dem Finger kann das Netz zerschnitten werden.",
+         "image": "cloth_dark.jpg",
+         "url": "projects/cloth"
+      },
+      {
+         "active": false,
+         "title": "Partikel Simulation",
+         "description": "Eine wunderschöne und entspannende Simulation der chaotischen gegenseitigen gravitativen Anziehung mehrerer Partikel.",
+         "image": "gravity.jpg",
+         "url": "projects/gravity"
+      },
+      {
+         "active": true,
+         "title": "Galaxie Kollision",
+         "description": "Eine Simulation mehrerer zufällig initialisierter Galaxien in einem leeren Raum, die miteinander kollidieren und am Ende zu einer einzigen Galaxie fusionieren.",
+         "image": "galaxies.jpg",
+         "url": "projects/galaxies"
+      },
+      {
+         "active": true,
+         "title": "Pfadoptimierung",
+         "description": "Ein evolutionärer Algorithmus, der durch zufällige Mutationen effizient versucht, die kürzeste Verbindung zwischen mehreren Punkten zu finden.",
+         "image": "paths_dark.jpg",
+         "url": "projects/paths"
+      },
+      {
+         "active": true,
+         "title": "Klassifizierung von Ziffern",
+         "description": "Eine künstliche Intelligenz lernt mithilfe des MNIST Datensatzes, handschriftliche Ziffern zu erkennen. Trainiere die KI und zeichne Ziffern in den Canvas!",
+         "image": "mnist.jpg",
+         "url": "projects/mnist"
+      },
+      {
+         "active": false,
+         "title": "Bitcoin KI",
+         "description": "Eine künstliche Intelligenz lernt, den Preis von Bitcoin basierend auf den vergangenen 14 Tagen für die nächsten 5 Tage vorherzusagen.",
+         "image": "stocks.jpg",
+         "url": "projects/stockai"
+      },
+      {
+         "active": true,
+         "title": "Ray Casting",
+         "description": "Die Konversion einer zweidimensionalen Karte in eine dreidimensionale Welt durch das Emittieren hunderter von Lichtstrahlen.",
+         "image": "raycasting.jpg",
+         "url": "projects/raycasting"
+      },
+      {
+         "active": true,
+         "title": "Ray Tracing",
+         "description": "Eine echte Ray Tracing Engine, die durch das rekursive Aussenden tausender simulierter Photonen fotorealistische Bilder mit Reflektionen und Spiegelungen rendern kann.",
+         "image": "raytracing.jpg",
+         "url": "projects/raytracing"
+      },
+      {
+         "active": true,
+         "title": "Wireframe Odyssey",
+         "description2": "Ein kleines, edles und liebenswertes 3D-Spiel mit besonderem Grafikstil, bei dem man in mehreren verschiedenen Leveln (gegen die Zeit?) kleine Rätsel lösen muss, ohne dabei zu sterben. (Noch) nicht für Touchscreens.",
+         "description": "Die Grundkonstruktion eines kleinen, edlen und liebenswerten 3D-Spiels mit besonderem Grafikstil, bei dem man später in verschiedenen Leveln kleine Rätsel lösen können soll. Noch nicht für Touchscreens optimiert.",
+         "image": "wireframe.jpg",
+         "url": "projects/3d_world"
+      },
+      {
+         "active": false,
+         "title": "Symmetrische Verschlüsselung",
+         "description": "Eine symmetrische Verschlüsselung, die Texte mit einem Schlüssel verschlüsseln und später wieder entschlüsseln kann.",
+         "image": "encryption_dark.jpg",
+         "url": "projects/encryption"
+      },
+      {
+         "active": false,
+         "title": "LZ78 Textkompression",
+         "description": "Ein simpler Algorithmus zum Komprimieren von Daten nach dem Vorbild von Lempel und Ziv, der angewandt auf sehr lange Texte erstaunliche Kompressionsraten erzielen kann.",
+         "image": "compression.jpg",
+         "url": "projects/compression"
+      },
+      {
+         "active": true,
+         "title": "Elliptische Kurven Kryptographie",
+         "description": "Eine asymmetrische Verschlüsselung, die mithilfe des Diffie-Hellman Schlüsselaustauschverfahrens den Schlüssel zum Ver- und Entschlüsseln einer Nachricht sicher zwischen zwei Kommunikationspartnern austauscht.",
+         "image": "ecc.jpg",
+         "url": "projects/ecc"
+      },
+      {
+         "active": true,
+         "title": "Subleq Assembler",
+         "description": "Ein Werkzeug, das Assembly Code in Befehle für Subleq OISC Computer übersetzen kann. Inklusive eines Subleq Emulators und Codebeispielen.",
+         "image": "subleq.jpg",
+         "url": "projects/subleq"
+      },
+      {
+         "active": true,
+         "title": "Game Of Life",
+         "description": "Das Spiel des Lebens von dem berühmten Mathematiker John Conway. Es simuliert eine zufällig initialisierte Anordnung von Zellen, über deren Leben und Tod nur drei simple Regeln bestimmen.",
+         "image": "gameoflife.jpg",
+         "url": "projects/gameoflife"
+      },
+      {
+         "active": true,
+         "title": "Mandelbrot",
+         "description": "Eine schöne Visualisierung des berühmten Mandelbrot Sets von Bernoit Mandelbrot. Es entsteht über die rekursive Folge Z.",
+         "image": "mandelbrot.jpg",
+         "url": "projects/mandelbrot"
+      },
+      {
+         "active": true,
+         "title": "Fraktalbaum",
+         "description": "Ein rekursives Fraktal, bei dem der Winkel zwischen den Ästen durch einen Slider verstellt werden kann, um alle Variationen des Baumes betrachten zu können.",
+         "image": "tree.jpg",
+         "url": "projects/tree"
+      },
+      {
+         "active": false,
+         "title": "Snake",
+         "description": "So simpel und elegant wie das klassische Snake. Touchscreens werden mittels Wischgesten unterstützt.",
+         "image": "snake_dark.jpg",
+         "url": "projects/snake"
+      },
+      {
+         "active": true,
+         "title": "Neuronales Netzwerk",
+         "description": "Eine JavaScript Klasse zum Erzeugen neuronaler Netzwerke. Eignet sich sowohl für Supervised als auch für Unsupervised Learning. Arbeitet sehr effizient und ist gut in andere Sprachen übersetzbar.",
+         "image": "neural_network.jpg",
+         "url": "https://pastefy.app/drCv7NRa?theme=auto"
+      },
+      {
+         "active": false,
+         "title": "I²C Protokoll",
+         "description": "Eine Library für den Arduino zur Kommunikation mit externen Geräten über I²C inklusive eines praktischen Anwendungsbeispiels anhand des MPU6050 Sensors.",
+         "image": "i2c.jpg",
+         "url": "https://pastefy.app/Sty5mwD1?theme=auto"
+      },
+      {
+         "active": false,
+         "title": "macOS Bildschirmschoner",
+         "description": "Bildschirmschoner mit einer Simulation der gegenseitigen gravitativen Anziehung mehrerer massereicher Körper.",
+         "image": "screensaver.jpg",
+         "url": "https://clippy.cc/?id=8a2ahjrftr9obys#w0pfhkohs6kdu5u"
+      }
+   ],
+   "texts": [
+      {
+         "active": true,
+         "title": "Der Ultimative Atlas Psychologischer Manipulation",
+         "description": "Eine präzise Enthüllung der Mechanismen, die unser unterbewusstes Denken und Handeln pausenlos kontrollieren – ein unverzichtbarer Leitfaden in einer Welt voller Populismus, Propaganda, Werbung und sozialer Manipulation.",
+         "image": "manipulation.jpg",
+         "url": "https://www.clippy.cc/?id=cab7a5179931#qy1ax5vxa84jwke"
+      },
+      {
+         "active": true,
+         "title": "Das Verkehrssystem der Zukunft",
+         "description": "Ein durchdachtes Konzept für ein neues Verkehrssystem, das den Fokus weg vom heiligen Auto zurück auf Menschen verlagert und damit viele Vorteile für die Gesellschaft schafft.",
+         "image": "future_city.jpg",
+         "url": "https://www.clippy.cc/?id=5eb963aa4e30#ycsihzbklkndd5b"
+      },
+      {
+         "active": true,
+         "title": "Elliptische Kurven in der Kryptographie",
+         "description": "Wie man mit elliptischen Kurven und ein bisschen Mathe extrem sichere Verschlüsselungsverfahren bauen kann, die selbst die NSA für Hochsicherheitsanwendungen empfiehlt, wird in dieser Seminararbeit aufbereitet und verständlich erklärt.",
+         "image": "ecc_text2.jpg",
+         "url": "more/ecc"
+      }
+   ],
+   "designs": [
+      {
+         "active": true,
+         "title": "Euroschein Redesign",
+         "description": "Das Euro-Redesign präsentiert eine kühne Vision, die Währung durch eine Palette frischer Farben und ein minimalistisches Layout neu zu interpretieren. Jeder Schein, von 5 bis 100 Euro, erhält eine eigene Identität durch eine spezifische Farbgebung und skizzenhafte Porträts bedeutender Persönlichkeiten, die Europas reiches Erbe reflektieren. Diese Serie verkörpert einen modernen Geist und verbindet traditionelle Werte mit einem zeitgenössischen Look, um das Geld der Zukunft zu gestalten.",
+         "images": ["euro.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "The all new macOS",
+         "description": "Das macOS Redesign ist eine Ode an Farbenfreude und benutzerzentrierte Klarheit. Es kombiniert eine warme, dynamische Farbpalette mit einem modernen, abgerundeten Design und bringt damit eine neue Ebene der Zugänglichkeit und Freude in die Nutzererfahrung. Die sanften Übergänge und schwebenden Fenstereffekte erwecken den Desktop zum Leben, während die klare Struktur der Benutzeroberfläche eine intuitive Navigation gewährleistet. Dieses Design ist nicht nur eine optische Auffrischung, sondern auch ein klares Statement für Effizienz und Eleganz im digitalen Alltag.",
+         "images": ["macos1.jpeg", "macos2.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "Revolut Reimagined",
+         "description": "Das neugestaltete Interface der Revolut App verkörpert ein Zusammenspiel von Effizienz und Eleganz. Mit einer reduzierten Farbpalette und einem klaren Design steht die Benutzererfahrung im Vordergrund: Finanzüberblick auf einen Blick, nahtlose Navigation und eine intuitive Handhabung der Features. Dieses Redesign revolutioniert nicht nur die Interaktion mit finanziellen Tools, es transformiert alltägliches Finanzmanagement in ein visuell ansprechendes und müheloses Erlebnis.",
+         "images": ["revolut.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "YouTube Redesign",
+         "description": "In diesem kühnen Redesign von YouTube verschmelzen Ästhetik und Funktionalität zu einer nahtlosen Nutzererfahrung. Mit seiner intuitiven Oberfläche und dem lebendigen Farbschema hebt es die Inhalte auf einzigartige Weise hervor. Die Benutzerführung ist optimiert, um die Entdeckung neuer Inhalte zu erleichtern und gleichzeitig ein immersives Erlebnis zu gewährleisten. Besonders hervorzuheben ist die schwebende Kartenästhetik, die jedes Video in den Mittelpunkt stellt und den Inhalt für sich sprechen lässt. Dieses Design ist nicht nur eine optische Freude, sondern auch ein kluger Schritt hin zu einer personalisierteren und interaktiveren Art, Inhalte zu konsumieren.",
+         "images": ["youtube1.jpeg", "youtube2.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "WhatsApp Redesign",
+         "description": "Das Redesign von WhatsApp präsentiert einen frischen, modernen Ansatz, der die Klarheit der Kommunikation mit einem eleganten visuellen Stil verbindet. Im hellen Modus schaffen weiche Töne und sanfte Schatten eine freundliche und einladende Atmosphäre, während der dunkle Modus eine fokussierte und augenschonende Umgebung für nächtliche Chats bietet. Die klare Typografie und die intuitiven Icons verbessern die Lesbarkeit und Bedienbarkeit, was die App nicht nur optisch ansprechender, sondern auch funktional zugänglicher macht. Dieses Redesign reflektiert eine Balance zwischen Schönheit und Benutzerfreundlichkeit und schafft so eine Plattform, die das tägliche Chatten zu einem angenehmen Erlebnis macht.",
+         "images": ["whatsapp.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "Google Search Reimagined",
+         "description": "Das Redesign der Google-Suche verbindet Schlichtheit mit Zweckmäßigkeit und erschafft ein luftiges, einladendes Interface, das die Grenzen zwischen Nutzer und Wissen verwischt. Die Neugestaltung nutzt sanfte Farbverläufe und saubere Linien, um eine Umgebung zu schaffen, in der Klarheit herrscht und die Informationsfindung nicht nur effizient, sondern auch ästhetisch ansprechend ist. Mit der neuen Gestaltung wird jeder Suchvorgang zu einem visuellen Vergnügen und die Antwortpräsentation mithifle von KI zu einer nahtlosen Erweiterung des Nutzerdenkens.",
+         "images": ["google1.jpeg", "google2.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "Wahlplakate Design",
+         "description": ".....",
+         "images": ["electionposter.jpeg"]
+      },
+      {
+         "active": true,
+         "title": "Schwungrad Energiespeicher Interface",
+         "description": ".....",
+         "images": ["flywheelstorage.jpeg"]
+      },
+      {
+         "active": false,
+         "title": "Parkplatz-Beschilderung",
+         "description": "Das Design des Parkplatzschildes ist ein mutiges Statement und ein ironischer Kommentar zur modernen Automobilkultur. Mit dem Titel \"Zoo der knatternden Blechmonster\" wird der Parkplatz zu einer historischen Ausgrabungsstätte erklärt, in der die Relikte vergangener Mobilität – Audi, Volkswagen, Mercedes – als Fossilien einer überholten Ära präsentiert werden. Die Botschaft spiegelt die Dringlichkeit der Verkehrswende hin zu nachhaltiger Mobilität wider. Dieses Design geht über reine Funktionalität hinaus; es fordert zum Nachdenken und zur Diskussion über die Zukunft unserer Städte und unseren Umgang mit dem Planeten auf.",
+         "images": ["parkplatz.jpeg"]
+      }
+   ],
+   "bio": {
+      "profileImage": "magician.png",
+      "title": "Hey, ich bin Merlin 😊",
+      "description": "Schön, dass Du hier bist! Das wichtigste vorweg; diese Website ist eine Sammlung einiger meiner experimentellen und präsentierbaren persönlichen Projekte. Nicht allumfassend, nicht unbedingt das allerbeste und nicht zu 100% fertig, aber alles, was ich hier gut aufgehoben sehe. <br /><br />Kurz über mich: Ich bin 21 Jahre alt und studiere derzeit Informatik an der Technischen Universität München. So gut, so langweilig. Meine Interessen gehen jedoch weit über Computer hinaus und reichen tief in die Bereiche Künstliche Intelligenz, User Experience Design und die Psychologie. Auch beschäftige ich mich gerne mit technischen und sozialen Lösungen für die Energie- und Verkehrswende in den Bereichen Energietechnik, menschenzentrisches Stadtdesign und Elektromobilität, um meinen Teil dazu beitragen zu können, die drängenden Probleme unserer Zeit zu lösen. Dazu \"bastle\" ich gerne und habe mir beispielsweise mithilfe einiger 3D-gedruckter Teile ein E-Bike, ein \"kleines\" drei Meter hohes vertikales Windrad oder eine PV-Inselanlage gebaut. Um die Schönheit der Landschaft einzufangen fliege ich auch liebend gerne mit meiner Drohne und mache schöne Luftaufnahmen. Dieser Weg hat mich dazu inspiriert, über den Tellerrand hinauszuschauen und tiefe, interdisziplinäre Verbindungen zwischen Technologie, Umwelt und Gesellschaft zu erkunden.<br /><br />Du kannst mir gerne jederzeit eine Email schreiben. Wenn Du ChatGPT-Plus-Abonnent bist, kannst du gerne auch spaßeshalber mit einem virtuellen Klon von mir sprechen.",
+      "actions": [
+         {
+            "text": "Schreibe Mir",
+            "href": "mailto:contact@merlinhof.de?subject=merlinhof.de&body=Hey%20:D",
+            "icon": "mail.png"
+         },
+         {
+            "text": "Virtuelles Ich",
+            "href": "https://chat.openai.com/g/g-7Vk47IFtS-virtualmerlin",
+            "icon": "star.png"
+         }
+      ]
+   }
+}
