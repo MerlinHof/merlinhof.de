@@ -24,8 +24,10 @@
 }
 @font-face {
    font-family: "chewy";
-   /* src: url("/assets/fonts/chewy.ttf"); */
-   /* src: url("/assets/fonts/frederickathegreat.ttf"); */
+   src: url("/assets/fonts/chewy.ttf");
+}
+@font-face {
+   font-family: "dmserifdisplay";
    src: url("/assets/fonts/dmserifdisplay.ttf");
 }
 

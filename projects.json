@@ -36,6 +36,13 @@
          "url": "projects/cloth"
       },
       {
+         "active": true,
+         "title": "Vec2Laser",
+         "description": "Eine leistungsstarke, Web-basierte Steuerungssoftware für Laser-Plotter wie Gravierer oder Schneider mit einer intuitiven und modernen Oberfläche.",
+         "image": "laser.jpg",
+         "url": "https://github.com/MerlinHof/vec2laser"
+      },
+      {
          "active": false,
          "title": "Partikel Simulation",
          "description": "Eine wunderschöne und entspannende Simulation der chaotischen gegenseitigen gravitativen Anziehung mehrerer Partikel.",
@@ -190,7 +197,7 @@
          "title": "Elliptische Kurven in der Kryptographie",
          "description": "Wie man mit elliptischen Kurven und ein bisschen Mathe extrem sichere Verschlüsselungsverfahren bauen kann, die selbst die NSA für Hochsicherheitsanwendungen empfiehlt, wird in dieser Seminararbeit aufbereitet und verständlich erklärt.",
          "image": "ecc_text2.jpg",
-         "url": "more/ecc"
+         "url": "assets/ecc.pdf"
       }
    ],
    "designs": [

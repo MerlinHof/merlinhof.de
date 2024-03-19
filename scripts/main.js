@@ -71,7 +71,7 @@ function showListContainer(data) {
 
       if (obj.image != undefined && obj.images == undefined) {
          DOM.create("div.projectElementContainer")
-            .append(DOM.create("t.title").setText(obj.title))
+            .append(DOM.create("t.title.projectElementTitle").setText(obj.title))
             .append(DOM.create("div.projectElementImageContainer").append(DOM.create(`img.projectElementImage [src=/assets/images/previews/${obj.image}]`)))
             .append(DOM.create("t.text.projectElementDescription").setText(obj.description))
             .onClick(() => {
@@ -80,7 +80,7 @@ function showListContainer(data) {
             .appendTo(DOM.select("contentContainer"));
       } else {
          let container = DOM.create("div.projectElementContainer.designElementContainer")
-            .append(DOM.create("t.title").setText(obj.title))
+            .append(DOM.create("t.title.projectElementTitle").setText(obj.title))
             .append(DOM.create("t.text.projectElementDescription").setText(obj.description))
             .appendTo(DOM.select("contentContainer"));
          for (let image of obj.images) {
