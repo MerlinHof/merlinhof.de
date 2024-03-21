@@ -45,7 +45,7 @@
 
 * {
    font-family: bold;
-   font-size: 22px;
+   font-size: clamp(20px, 5vw, 22px);
    -webkit-tap-highlight-color: transparent;
    cursor: default;
    overflow-wrap: break-word;
@@ -106,8 +106,7 @@ body {
 
 .title {
    font-family: chewy;
-   font-size: 37px;
-   font-size: 48px;
+   font-size: clamp(38px, 6vw, 48px);
    display: inline-block;
    margin-bottom: 20px;
    text-align: center;
