@@ -75,7 +75,7 @@ function showListContainer(data) {
             .append(DOM.create("div.projectElementImageContainer").append(DOM.create(`img.projectElementImage [src=/assets/images/previews/${obj.image}]`)))
             .append(DOM.create("t.text.projectElementDescription").setText(obj.description))
             .onClick(() => {
-               window.location.href = obj.url;
+               window.open(obj.url, "_blank");
             })
             .appendTo(DOM.select("contentContainer"));
       } else {

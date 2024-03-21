@@ -220,7 +220,6 @@
 }
 
 .projectElementImageContainer {
-   /* width: calc(100% - 24px); */
    width: 100%;
    position: relative;
    transition: 0.3s;
@@ -236,7 +235,7 @@
    position: absolute;
    left: 0px;
    top: 0px;
-   border-radius: 30px;
+   border-radius: 32px;
    box-sizing: border-box;
    border: 3px solid var(--textColor);
    opacity: 0.1;
